@@ -50,7 +50,7 @@ export default function ActivityPage() {
       {loading ? (
         <div className="space-y-3">{[...Array(8)].map((_, i) => <Skeleton key={i} className="h-16" />)}</div>
       ) : filtered.length === 0 ? (
-        <EmptyState icon="📜" title="No activity yet" description="Run the demo to generate agent activity" />
+        <EmptyState icon="📜" title="No activity yet" description="The autonomous engine logs all verification audits, status changes, and notifications here." />
       ) : (
         <div className="space-y-2">
           {filtered.map(e => (

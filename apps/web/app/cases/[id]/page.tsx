@@ -172,7 +172,7 @@ export default function CaseDetailPage() {
         <Card>
           <h2 className="font-semibold text-[#111827] text-sm mb-3">Requirements ({doneCount}/{requirements.length})</h2>
           {requirements.length === 0 ? (
-            <EmptyState icon="📝" title="No requirements" description="Run the demo to see requirements" />
+            <EmptyState icon="📝" title="No requirements" description="No requirements configured for this case yet." />
           ) : (
             <div className="space-y-2">{requirements.map(r => <RequirementRow key={r.id} req={r} />)}</div>
           )}

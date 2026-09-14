@@ -19,26 +19,29 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [rules, setRules] = useState<ScoringRules | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  async function loadData() {
+  async function loadData(manual = false) {
+    if (manual) setRefreshing(true);
     try {
-      const [s, c, e, r] = await Promise.all([
+      const [s, c, e] = await Promise.all([
         getCommitmentStats(),
         getCommitments({ limit: 20 }),
         getEvents(15),
-        getScoringRules(),
       ]);
       setStats(s);
       setCommitments(c);
       setEvents(e);
-      setRules(r);
     } catch {}
     setLoading(false);
+    if (manual) setRefreshing(false);
   }
 
   useEffect(() => {
+    // Fetch rules once on mount
+    getScoringRules().then(setRules).catch(() => {});
     loadData();
-    const interval = setInterval(loadData, 8000);
+    const interval = setInterval(() => loadData(false), 25000);
     return () => clearInterval(interval);
   }, []);
 
@@ -65,6 +68,15 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => loadData(true)}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E4E7EC] rounded-xl text-xs font-semibold text-[#667085] hover:text-[#111827] hover:border-indigo-300 transition-colors shadow-2xs disabled:opacity-60"
+            title="Refresh dashboard data"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-indigo-500 ${refreshing ? 'animate-spin' : ''}`} />
+            <span>{refreshing ? 'Refreshing…' : 'Refresh'}</span>
+          </button>
           <button
             onClick={() => setShowRulesModal(true)}
             className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E4E7EC] rounded-xl text-xs font-semibold text-[#667085] hover:text-[#111827] hover:border-indigo-300 transition-colors shadow-2xs"

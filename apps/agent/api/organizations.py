@@ -9,9 +9,24 @@ from datetime import datetime, timezone
 from services.supabase_client import supabase
 import structlog
 import re
+import asyncio
+import time
 
 log = structlog.get_logger()
 router = APIRouter(prefix="/api", tags=["organizations-teams-users"])
+
+_orgs_cache = {"data": None, "time": 0}
+_teams_cache = {"data": None, "time": 0}
+_users_cache = {"data": None, "time": 0}
+
+def invalidate_orgs_cache():
+    _orgs_cache["data"] = None
+
+def invalidate_teams_cache():
+    _teams_cache["data"] = None
+
+def invalidate_users_cache():
+    _users_cache["data"] = None
 
 
 # ─── Pydantic Schemas ────────────────────────────────────────────────────────
@@ -45,25 +60,32 @@ class UserCreate(BaseModel):
 
 @router.get("/organizations")
 async def list_organizations():
-    """List all organizations with their associated teams count and member count."""
+    """List all organizations with their associated teams count and member count (cached 15s)."""
+    now = time.time()
+    if _orgs_cache["data"] and (now - _orgs_cache["time"]) < 15:
+        return _orgs_cache["data"]
+
     try:
-        orgs = supabase().table("organizations").select("*").order("created_at", desc=False).execute().data or []
-        teams = supabase().table("teams").select("organization_id").execute().data or []
-        
-        # Aggregate team counts
-        counts = {}
-        for t in teams:
-            oid = t.get("organization_id")
-            counts[oid] = counts.get(oid, 0) + 1
-            
-        for org in orgs:
-            org["team_count"] = counts.get(org["id"], 0)
-            if not org.get("slug"):
-                org["slug"] = re.sub(r'[^a-z0-9]+', '-', org["name"].lower()).strip('-')
-        return orgs
+        def _fetch():
+            orgs = supabase().table("organizations").select("*").order("created_at", desc=False).execute().data or []
+            teams = supabase().table("teams").select("organization_id").execute().data or []
+            counts = {}
+            for t in teams:
+                oid = t.get("organization_id")
+                counts[oid] = counts.get(oid, 0) + 1
+            for org in orgs:
+                org["team_count"] = counts.get(org["id"], 0)
+                if not org.get("slug"):
+                    org["slug"] = re.sub(r'[^a-z0-9]+', '-', org["name"].lower()).strip('-')
+            return orgs
+
+        data = await asyncio.to_thread(_fetch)
+        _orgs_cache["data"] = data
+        _orgs_cache["time"] = now
+        return data
     except Exception as e:
         log.error("list_organizations_error", error=str(e))
-        return []
+        return _orgs_cache["data"] or []
 
 
 @router.post("/organizations")
@@ -80,19 +102,22 @@ async def create_organization(body: OrganizationCreate):
         }
     }
     try:
-        res = supabase().table("organizations").insert(payload).execute()
+        res = await asyncio.to_thread(supabase().table("organizations").insert(payload).execute)
         item = res.data[0] if res.data else {}
         
         # Auto-create default General team
         if item.get("id"):
-            supabase().table("teams").insert({
+            await asyncio.to_thread(supabase().table("teams").insert({
                 "organization_id": item["id"],
                 "organization_name": item["name"],
                 "name": "General Platform",
                 "slug": "general",
                 "description": f"Core operations team for {item['name']}",
                 "lead_username": "rahulk"
-            }).execute()
+            }).execute)
+        
+        invalidate_orgs_cache()
+        invalidate_teams_cache()
         return item
     except Exception as e:
         log.error("create_org_error", error=str(e))
@@ -104,14 +129,25 @@ async def create_organization(body: OrganizationCreate):
 @router.get("/teams")
 async def list_teams(organization_id: Optional[str] = None, organization_name: Optional[str] = None):
     """List teams, optionally filtered by organization id or name."""
+    now = time.time()
+    if not organization_id and not organization_name and _teams_cache["data"] and (now - _teams_cache["time"]) < 15:
+        return _teams_cache["data"]
+
     try:
-        q = supabase().table("teams").select("*").order("name", desc=False)
-        if organization_id:
-            q = q.eq("organization_id", organization_id)
-        elif organization_name:
-            q = q.eq("organization_name", organization_name)
-        res = q.execute()
-        return res.data or []
+        def _fetch():
+            q = supabase().table("teams").select("*").order("name", desc=False)
+            if organization_id:
+                q = q.eq("organization_id", organization_id)
+            elif organization_name:
+                q = q.eq("organization_name", organization_name)
+            res = q.execute()
+            return res.data or []
+
+        teams = await asyncio.to_thread(_fetch)
+        if not organization_id and not organization_name:
+            _teams_cache["data"] = teams
+            _teams_cache["time"] = now
+        return teams
     except Exception as e:
         log.error("list_teams_error", error=str(e))
         return []
@@ -120,11 +156,10 @@ async def list_teams(organization_id: Optional[str] = None, organization_name: O
 @router.post("/teams")
 async def create_team(body: TeamCreate):
     """Create a new team under an organization."""
-    # Lookup org name
-    org = supabase().table("organizations").select("name").eq("id", body.organization_id).single().execute().data
-    org_name = org.get("name") if org else "FollowFlow Labs"
+    org = await asyncio.to_thread(supabase().table("organizations").select("name").eq("id", body.organization_id).single().execute)
+    org_data = org.data if org else {}
+    org_name = org_data.get("name") if org_data else "FollowFlow Labs"
     slug = body.slug or re.sub(r'[^a-z0-9]+', '-', body.name.lower()).strip('-')
-    
     clean_lead = body.lead_username.lstrip("@") if body.lead_username else "rahulk"
     
     payload = {
@@ -136,7 +171,9 @@ async def create_team(body: TeamCreate):
         "lead_username": clean_lead,
     }
     try:
-        res = supabase().table("teams").insert(payload).execute()
+        res = await asyncio.to_thread(supabase().table("teams").insert(payload).execute)
+        invalidate_teams_cache()
+        invalidate_orgs_cache()
         return res.data[0] if res.data else {}
     except Exception as e:
         log.error("create_team_error", error=str(e))
@@ -151,8 +188,30 @@ async def list_users(search: Optional[str] = None):
     Search and list users by @username or full name.
     Supports autocomplete in team collaborator selection and mentions.
     """
+    now = time.time()
+    if not search and _users_cache["data"] and (now - _users_cache["time"]) < 15:
+        return _users_cache["data"]
+
     try:
-        res = supabase().table("users").select("*").order("reliability_score", desc=True).execute()
+        def _fetch():
+            res = supabase().table("users").select("*").order("reliability_score", desc=True).execute()
+            return res.data or []
+
+        users = await asyncio.to_thread(_fetch)
+        if not search:
+            _users_cache["data"] = users
+            _users_cache["time"] = now
+
+        if search:
+            clean = search.lstrip("@").lower()
+            users = [
+                u for u in users 
+                if clean in (u.get("username") or "").lower() or clean in (u.get("name") or "").lower()
+            ]
+        return users
+    except Exception as e:
+        log.error("list_users_error", error=str(e))
+        return _users_cache["data"] or []
         users = res.data or []
         if search:
             clean = search.lstrip("@").lower()
@@ -200,20 +259,22 @@ async def get_user_profile(username: str):
 
 @router.post("/users")
 async def create_or_update_user(body: UserCreate):
-    """Register or update a user with unique username validation."""
+    """Register or update a user with unique username validation directly in database."""
     clean_username = re.sub(r'[^a-zA-Z0-9_]+', '', body.username.lstrip("@")).lower()
     if not clean_username:
         raise HTTPException(400, "Username must contain alphanumeric characters or underscores")
     
-    existing = supabase().table("users").select("*").eq("username", clean_username).execute().data
+    existing_res = await asyncio.to_thread(supabase().table("users").select("*").eq("username", clean_username).execute)
+    existing = existing_res.data or []
     if existing:
-        res = supabase().table("users").update({
+        res = await asyncio.to_thread(supabase().table("users").update({
             "name": body.name,
             "email": body.email,
             "role": body.role.lower(),
             "title": body.title,
             "bio": body.bio,
-        }).eq("username", clean_username).execute()
+        }).eq("username", clean_username).execute)
+        invalidate_users_cache()
         return res.data[0] if res.data else existing[0]
     
     payload = {
@@ -225,5 +286,6 @@ async def create_or_update_user(body: UserCreate):
         "bio": body.bio or "FollowFlow Autonomous Network Contributor",
         "reliability_score": 95.0,
     }
-    res = supabase().table("users").insert(payload).execute()
-    return res.data[0] if res.data else {}
+    res = await asyncio.to_thread(supabase().table("users").insert(payload).execute)
+    invalidate_users_cache()
+    return res.data[0] if res.data else payload

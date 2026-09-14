@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import {
   ShieldCheck, Clock, Zap, CheckCircle, ArrowRight,
-  Brain, FileCheck, Trophy, Sparkles, MessageSquare, Lock
+  Brain, FileCheck, Trophy, Sparkles, MessageSquare, Lock, Activity
 } from 'lucide-react';
 import { Card } from '@/components/ui/index';
 
@@ -18,9 +18,9 @@ export default function LandingPage() {
           <span>AWS Agents for Humans — Professional Agents Track</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-indigo-200">Powered by Strands Agents SDK</span>
-          <Link href="/demo" className="underline font-semibold hover:text-white flex items-center gap-1">
-            <Zap className="w-3 h-3 text-amber-400" /> Run Live Demo →
+          <span className="text-indigo-200">Powered by Strands Agents SDK & AWS Bedrock</span>
+          <Link href="/dashboard" className="underline font-semibold hover:text-white flex items-center gap-1">
+            <Zap className="w-3 h-3 text-amber-400" /> Live on AWS ECS →
           </Link>
         </div>
       </div>
@@ -79,10 +79,10 @@ export default function LandingPage() {
               Create a Commitment <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/demo"
+              href="/dashboard"
               className="px-6 py-3.5 bg-white border border-[#E4E7EC] text-[#111827] rounded-xl font-bold text-sm hover:bg-[#F7F8FA] transition-all flex items-center gap-2"
             >
-              <Zap className="w-4 h-4 text-amber-500" /> See the Agent Work
+              <Activity className="w-4 h-4 text-indigo-600" /> Explore Live Dashboard
             </Link>
           </div>
         </div>
@@ -215,10 +215,10 @@ export default function LandingPage() {
               Go to Dashboard
             </Link>
             <Link
-              href="/demo"
+              href="/commitments?new=true"
               className="px-6 py-3 bg-white border border-[#E4E7EC] text-[#111827] font-bold text-sm rounded-xl hover:bg-[#F7F8FA]"
             >
-              Run Interactive Demo
+              Create a Commitment
             </Link>
           </div>
         </div>

@@ -22,10 +22,15 @@ async def list_cases(status: str = None, risk: str = None, limit: int = 50):
 
 @router.post("", response_model=dict)
 async def create_case(body: CaseCreate):
+    org_id = body.organization_id
+    if not org_id:
+        org_res = supabase().table("organizations").select("id").limit(1).execute()
+        org_id = org_res.data[0]["id"] if org_res.data else None
+
     data = {
         "title": body.title,
         "description": body.description,
-        "organization_id": body.organization_id or settings.demo_org_id,
+        "organization_id": org_id,
         "owner_id": body.owner_id,
         "status": "active",
         "risk": "low",

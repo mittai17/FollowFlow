@@ -9,7 +9,6 @@ from config import get_settings
 from api.cases import router as cases_router
 from api.promises import router as promises_router
 from api.routes import docs_router, approvals_router, events_router, agent_router
-from api.demo import router as demo_router
 from api.commitments import router as commitments_router
 from api.social import router as social_router
 from api.organizations import router as organizations_router
@@ -23,18 +22,6 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("followflow_starting", model=settings.ollama_model, provider=settings.strands_model_provider)
-    # Seed demo org if not exists
-    try:
-        from services.supabase_client import supabase
-        existing = supabase().table("organizations").select("id").eq("id", settings.demo_org_id).execute()
-        if not existing.data:
-            supabase().table("organizations").insert({
-                "id": settings.demo_org_id,
-                "name": "FollowFlow Demo Org",
-            }).execute()
-            log.info("demo_org_created")
-    except Exception as e:
-        log.warning("seed_error", error=str(e))
     yield
     log.info("followflow_shutdown")
 
@@ -64,7 +51,6 @@ app.include_router(docs_router)
 app.include_router(approvals_router)
 app.include_router(events_router)
 app.include_router(agent_router)
-app.include_router(demo_router)
 app.include_router(commitments_router)
 app.include_router(social_router)
 app.include_router(organizations_router)

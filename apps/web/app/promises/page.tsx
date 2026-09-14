@@ -41,7 +41,7 @@ export default function PromisesPage() {
       {loading ? (
         <div className="grid grid-cols-3 gap-4">{[...Array(6)].map((_, i) => <Skeleton key={i} className="h-40" />)}</div>
       ) : filtered.length === 0 ? (
-        <EmptyState icon="🤝" title="No promises found" description="Run the demo to see AI-detected commitments" />
+        <EmptyState icon="🤝" title="No promises found" description="Commitments captured from team communications and integrations will appear here." />
       ) : (
         <div className="grid grid-cols-3 gap-4">
           {filtered.map(p => {

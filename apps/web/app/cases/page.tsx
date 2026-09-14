@@ -28,8 +28,8 @@ export default function CasesPage() {
           <h1 className="text-2xl font-bold text-[#111827]">Cases</h1>
           <p className="text-sm text-[#667085] mt-0.5">{cases.length} total workflow cases</p>
         </div>
-        <Link href="/demo" className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors">
-          <Plus className="w-4 h-4" /> New via Demo
+        <Link href="/commitments?new=true" className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors">
+          <Plus className="w-4 h-4" /> New Commitment
         </Link>
       </div>
 
@@ -55,7 +55,7 @@ export default function CasesPage() {
         {loading ? (
           <div className="p-6 space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14" />)}</div>
         ) : filtered.length === 0 ? (
-          <EmptyState icon="📋" title="No cases found" description={search ? 'Try adjusting your search' : 'Run the demo to create cases'} />
+          <EmptyState icon="📋" title="No cases found" description={search ? 'Try adjusting your search' : 'No cases currently registered. Create a commitment to track progress.'} />
         ) : (
           <table className="w-full">
             <thead className="border-b border-[#E4E7EC] bg-[#F7F8FA]">

@@ -54,7 +54,7 @@ export default function DocumentsPage() {
         {loading ? (
           <div className="p-6 space-y-3">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-14" />)}</div>
         ) : docs.length === 0 ? (
-          <EmptyState icon="📄" title="No documents yet" description="Run the demo to see documents verified by the agent" />
+          <EmptyState icon="📄" title="No documents yet" description="Verified documents and proof artifacts will appear here as team commitments progress." />
         ) : (
           <table className="w-full">
             <thead className="border-b border-[#E4E7EC] bg-[#F7F8FA]">

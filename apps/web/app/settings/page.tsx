@@ -2,13 +2,14 @@
 import { useEffect, useState } from 'react';
 import {
   getOrganizations, getTeams, getUsers, getAvailableIntegrations,
+  createOrUpdateUser, createTeam,
   type Organization, type Team, type User, type IntegrationItem
 } from '@/lib/api';
 import { Card, Skeleton } from '@/components/ui/index';
 import {
   Settings as SettingsIcon, Building2, Users, ShieldCheck,
   KeyRound, Bell, Sliders, CheckCircle2, Copy, Check,
-  ExternalLink, Plus, RefreshCw, Lock, Terminal, Cloud
+  ExternalLink, Plus, RefreshCw, Lock, Terminal, Cloud, X, AlertCircle, Loader2
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -20,6 +21,27 @@ export default function SettingsPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [integrations, setIntegrations] = useState<IntegrationItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Modal States
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showAddTeamModal, setShowAddTeamModal] = useState(false);
+  const [modalSubmitting, setModalSubmitting] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
+
+  // User Form State
+  const [userName, setUserName] = useState('');
+  const [userUsername, setUserUsername] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userRole, setUserRole] = useState('Engineer');
+  const [userTitle, setUserTitle] = useState('');
+  const [userBio, setUserBio] = useState('');
+
+  // Team Form State
+  const [teamName, setTeamName] = useState('');
+  const [teamDesc, setTeamDesc] = useState('');
+  const [teamLead, setTeamLead] = useState('');
+  const [teamOrgId, setTeamOrgId] = useState('');
 
   // Agent Policy Settings
   const [gracePeriodHours, setGracePeriodHours] = useState(24);
@@ -53,6 +75,74 @@ export default function SettingsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  async function handleCreateUser(e: React.FormEvent) {
+    e.preventDefault();
+    setModalError(null);
+    if (!userName.trim() || !userUsername.trim() || !userEmail.trim()) {
+      setModalError('Full Name, @username, and work email are required.');
+      return;
+    }
+    setModalSubmitting(true);
+    try {
+      const cleanUsername = userUsername.replace(/^@/, '').trim().toLowerCase();
+      await createOrUpdateUser({
+        name: userName.trim(),
+        username: cleanUsername,
+        email: userEmail.trim(),
+        role: userRole.toLowerCase(),
+        title: userTitle.trim() || 'Engineer',
+        bio: userBio.trim() || 'FollowFlow Autonomous Contributor',
+      });
+      setShowAddUserModal(false);
+      setUserName('');
+      setUserUsername('');
+      setUserEmail('');
+      setUserTitle('');
+      setUserBio('');
+      setActionSuccessMessage(`User @${cleanUsername} directly inserted into PostgreSQL database!`);
+      setTimeout(() => setActionSuccessMessage(null), 4000);
+      await load();
+    } catch (err: any) {
+      setModalError(err.message || 'Failed to insert user into database.');
+    } finally {
+      setModalSubmitting(false);
+    }
+  }
+
+  async function handleCreateTeam(e: React.FormEvent) {
+    e.preventDefault();
+    setModalError(null);
+    if (!teamName.trim()) {
+      setModalError('Team name is required.');
+      return;
+    }
+    const targetOrgId = teamOrgId || organizations[0]?.id;
+    if (!targetOrgId) {
+      setModalError('No organization configured.');
+      return;
+    }
+    setModalSubmitting(true);
+    try {
+      await createTeam({
+        name: teamName.trim(),
+        description: teamDesc.trim() || `Operational unit for ${teamName}`,
+        lead_username: teamLead.replace(/^@/, '').trim() || (users[0]?.username || 'admin'),
+        organization_id: targetOrgId,
+      });
+      setShowAddTeamModal(false);
+      setTeamName('');
+      setTeamDesc('');
+      setTeamLead('');
+      setActionSuccessMessage(`Team "${teamName}" created successfully!`);
+      setTimeout(() => setActionSuccessMessage(null), 4000);
+      await load();
+    } catch (err: any) {
+      setModalError(err.message || 'Failed to create team.');
+    } finally {
+      setModalSubmitting(false);
+    }
+  }
 
   function handleSavePolicy(e: React.FormEvent) {
     e.preventDefault();
@@ -93,6 +183,13 @@ export default function SettingsPage() {
         <p className="text-xs sm:text-sm text-[#667085]">
           Manage multi-organization hierarchy, team memberships, industry webhooks, and agent autonomy limits.
         </p>
+
+        {actionSuccessMessage && (
+          <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{actionSuccessMessage}</span>
+          </div>
+        )}
       </div>
 
       {/* ── NAVIGATION TABS ── */}
@@ -164,6 +261,15 @@ export default function SettingsPage() {
                   Cross-functional teams managing shared commitment SLAs and collaborator tags.
                 </p>
               </div>
+              <button
+                onClick={() => {
+                  setModalError(null);
+                  setShowAddTeamModal(true);
+                }}
+                className="px-3 py-1.5 bg-white border border-[#E4E7EC] hover:bg-[#F7F8FA] text-[#111827] rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5 text-indigo-600" /> New Team
+              </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -186,7 +292,24 @@ export default function SettingsPage() {
 
           {/* Members & Usernames Directory */}
           <div className="p-6 bg-white border border-[#E4E7EC] rounded-[24px] shadow-xs space-y-4">
-            <h3 className="font-bold text-sm text-[#111827]">Authenticated Members & Handles (@username culture)</h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-sm text-[#111827]">Authenticated Members & Handles (@username culture)</h3>
+                <p className="text-[11px] text-[#667085]">
+                  Real users stored in PostgreSQL. Each member has a unique @username for assignment and tracking.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setModalError(null);
+                  setShowAddUserModal(true);
+                }}
+                className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add User to Database
+              </button>
+            </div>
+
             <div className="divide-y divide-[#E4E7EC]">
               {users.map((u) => (
                 <div key={u.id} className="py-3 flex items-center justify-between">
@@ -350,6 +473,261 @@ export default function SettingsPage() {
             <p className="text-[11px] text-indigo-700 font-mono">
               http://localhost:8000/invocations · Health: http://localhost:8000/ping
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: ADD USER DIRECTLY TO DATABASE ── */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white border border-[#E4E7EC] rounded-[24px] shadow-2xl max-w-lg w-full p-6 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E4E7EC]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-[#111827]">Add Member Directly to DB</h3>
+                  <p className="text-[11px] text-[#667085]">Persists real user record to public.users in Supabase PostgreSQL</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddUserModal(false)}
+                className="p-1 rounded-lg text-[#667085] hover:text-[#111827] hover:bg-[#F7F8FA]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {modalError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{modalError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateUser} className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-[#111827] block mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Priya Sharma"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-[#111827] block mb-1">Handle (@username) *</label>
+                  <div className="flex items-center bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl px-2.5 focus-within:ring-2 focus-within:ring-indigo-600/20">
+                    <span className="text-indigo-600 font-bold font-mono">@</span>
+                    <input
+                      type="text"
+                      required
+                      placeholder="priyas"
+                      value={userUsername.replace(/^@/, '')}
+                      onChange={(e) => setUserUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                      className="w-full px-1.5 py-2 bg-transparent font-mono text-xs font-semibold focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-[#111827] block mb-1">Work Email *</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="priya.sharma@company.com"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-[#111827] block mb-1">Organization Role</label>
+                  <select
+                    value={userRole}
+                    onChange={(e) => setUserRole(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl font-semibold focus:outline-none"
+                  >
+                    <option value="Engineer">Engineer</option>
+                    <option value="Lead">Team Lead</option>
+                    <option value="Product Manager">Product Manager</option>
+                    <option value="Admin">Administrator</option>
+                    <option value="Auditor">Security Auditor</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-[#111827] block mb-1">Title</label>
+                  <input
+                    type="text"
+                    placeholder="Staff Platform Engineer"
+                    value={userTitle}
+                    onChange={(e) => setUserTitle(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl font-medium focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-[#111827] block mb-1">Bio / Responsibilities</label>
+                <textarea
+                  rows={2}
+                  placeholder="Owns AWS infrastructure deployment, reliability SLAs, and service promises."
+                  value={userBio}
+                  onChange={(e) => setUserBio(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl font-medium focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-[#E4E7EC] flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddUserModal(false)}
+                  disabled={modalSubmitting}
+                  className="px-4 py-2 rounded-xl border border-[#E4E7EC] text-[#667085] hover:bg-[#F7F8FA] font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={modalSubmitting}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                >
+                  {modalSubmitting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Inserting User...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3.5 h-3.5" /> Save User to Database
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: CREATE TEAM ── */}
+      {showAddTeamModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white border border-[#E4E7EC] rounded-[24px] shadow-2xl max-w-lg w-full p-6 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E4E7EC]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-[#111827]">Create Operational Team</h3>
+                  <p className="text-[11px] text-[#667085]">Adds a team unit to manage commitments and SLA tracking</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddTeamModal(false)}
+                className="p-1 rounded-lg text-[#667085] hover:text-[#111827] hover:bg-[#F7F8FA]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {modalError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{modalError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateTeam} className="space-y-4 text-xs">
+              <div>
+                <label className="font-bold text-[#111827] block mb-1">Team Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Infrastructure Reliability"
+                  value={teamName}
+                  onChange={(e) => setTeamName(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-[#111827] block mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  placeholder="Manages AWS container deployments, database migrations, and uptime commitments."
+                  value={teamDesc}
+                  onChange={(e) => setTeamDesc(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl font-medium focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-[#111827] block mb-1">Team Lead (@username)</label>
+                  <select
+                    value={teamLead}
+                    onChange={(e) => setTeamLead(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl font-semibold focus:outline-none"
+                  >
+                    <option value="">Select Team Lead...</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.username}>
+                        @{u.username} ({u.name})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-[#111827] block mb-1">Organization</label>
+                  <select
+                    value={teamOrgId || organizations[0]?.id || ''}
+                    onChange={(e) => setTeamOrgId(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl font-semibold focus:outline-none"
+                  >
+                    {organizations.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-[#E4E7EC] flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddTeamModal(false)}
+                  disabled={modalSubmitting}
+                  className="px-4 py-2 rounded-xl border border-[#E4E7EC] text-[#667085] hover:bg-[#F7F8FA] font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={modalSubmitting}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                >
+                  {modalSubmitting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Creating Team...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3.5 h-3.5" /> Create Team
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

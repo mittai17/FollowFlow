@@ -22,7 +22,6 @@ const agentNav = [
   { href: '/activity', label: 'Agent Activity', icon: Activity },
   { href: '/approvals', label: 'Approvals', icon: CheckCircle2 },
   { href: '/verification', label: 'Verification', icon: ShieldCheck },
-  { href: '/demo', label: 'Autonomous Simulator', icon: Zap },
 ];
 
 const mobileBottomNav = [

@@ -22,9 +22,6 @@ class Settings(BaseSettings):
     aws_profile: str = "mittai17"
     aws_default_region: str = "ap-northeast-1"
 
-    demo_org_id: str = "00000000-0000-0000-0000-000000000001"
-    demo_user_id: str = "00000000-0000-0000-0000-000000000099"
-
     class Config:
         env_file = ".env"
         extra = "ignore"
