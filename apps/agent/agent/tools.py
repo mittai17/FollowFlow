@@ -445,11 +445,13 @@ def update_social_status(commitment_id: str, status_message: str) -> dict:
 
 @tool
 def log_agent_event(commitment_id: Optional[str] = None, event_type: str = "agent_action",
-                    description: str = "", actor_type: str = "agent", metadata: Optional[dict] = None) -> dict:
+                    description: str = "", actor_type: str = "agent", metadata: Optional[dict] = None,
+                    case_id: Optional[str] = None, title: Optional[str] = None, **kwargs) -> dict:
     """Log an autonomous action to the audit timeline."""
+    desc = description or title or ""
     data: dict = {
         "event_type": event_type,
-        "description": description,
+        "description": desc,
         "actor_type": actor_type,
         "metadata": metadata or {},
     }

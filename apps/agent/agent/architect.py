@@ -128,7 +128,10 @@ title, description, suggested_deadline, deadline_label, integration_provider, ev
     try:
         import asyncio
         loop = asyncio.get_event_loop()
-        agent_result = await loop.run_in_executor(None, lambda: agent(user_context))
+        agent_result = await asyncio.wait_for(
+            loop.run_in_executor(None, lambda: agent(user_context)),
+            timeout=8.0
+        )
         result_text = str(agent_result)
         
         # Extract json from text

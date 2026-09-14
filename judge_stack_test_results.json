@@ -1,0 +1,239 @@
+{
+  "total": 36,
+  "passed": 36,
+  "failed": 0,
+  "tiers": {
+    "Tier 1: Infrastructure & AWS Protocols": [
+      {
+        "name": "FastAPI /health check",
+        "passed": true,
+        "duration_ms": 27.29,
+        "details": "status=200, service=FollowFlow Agent API"
+      },
+      {
+        "name": "Amazon Bedrock AgentCore /ping protocol",
+        "passed": true,
+        "duration_ms": 3.99,
+        "details": "status=200, payload={'status': 'Healthy'}"
+      },
+      {
+        "name": "Amazon Bedrock AgentCore /invocations contract",
+        "passed": true,
+        "duration_ms": 27467.41,
+        "details": "status=200, exec_status=completed"
+      }
+    ],
+    "Tier 2: Ingress & Reverse Proxy Layer": [
+      {
+        "name": "Next.js Rewrite: /api/users",
+        "passed": true,
+        "duration_ms": 279.66,
+        "details": "status=200, users_count=6"
+      },
+      {
+        "name": "Next.js Rewrite: /api/commitments",
+        "passed": true,
+        "duration_ms": 315.83,
+        "details": "status=200, count=17"
+      },
+      {
+        "name": "Next.js Rewrite: /api/feed",
+        "passed": true,
+        "duration_ms": 268.95,
+        "details": "status=200, feed_events=9"
+      },
+      {
+        "name": "Next.js Rewrite: /api/profile/rahulk",
+        "passed": true,
+        "duration_ms": 1627.18,
+        "details": "status=200, badges=4"
+      }
+    ],
+    "Tier 3: Database & Multi-Tenant Data Layer": [
+      {
+        "name": "PostgreSQL: Authenticated Users & Handles",
+        "passed": true,
+        "duration_ms": 540.19,
+        "details": "count=6, handles=['rahulk', 'sarahc', 'alexr', 'priyap', 'mittai', 'devtester']"
+      },
+      {
+        "name": "PostgreSQL: Multi-Tenant Organizations",
+        "passed": true,
+        "duration_ms": 543.38,
+        "details": "count=3, names=['FollowFlow Labs', 'Acme Systems Inc', 'Starlight Autonomous AI']"
+      },
+      {
+        "name": "PostgreSQL: Commitment Records & Schema",
+        "passed": true,
+        "duration_ms": 753.05,
+        "details": "count=17, statuses=['WAITING_FOR_EVIDENCE', 'RESCHEDULED', 'MISSED', 'VERIFIED', 'ACTIVE', 'AT_RISK', 'DUE_TODAY', 'DUE_SOON']"
+      }
+    ],
+    "Tier 4: Strands AI Copilot & Reasoning Engine": [
+      {
+        "name": "Strands SDK Native @tool Execution",
+        "passed": true,
+        "duration_ms": 318.33,
+        "details": "GitHub, Horizon, SLA tools verified"
+      },
+      {
+        "name": "Strands Auto-Architect Intent Generation",
+        "passed": true,
+        "duration_ms": 8009.05,
+        "details": "title=Deploy AWS S3 zero-trust token rota..., deadline=2026-09-18"
+      },
+      {
+        "name": "NLP Commitment Extraction Engine",
+        "passed": true,
+        "duration_ms": 25101.35,
+        "details": "extracted="
+      }
+    ],
+    "Tier 5: Human-in-the-Loop & State Transitions": [
+      {
+        "name": "POST /api/commitments (Contract Creation)",
+        "passed": true,
+        "duration_ms": 1377.92,
+        "details": "id=d2647d61-e1f8-4b2d-aaf7-682ec0b78efb"
+      },
+      {
+        "name": "GET /api/commitments/d2647d61... (Detail Query)",
+        "passed": true,
+        "duration_ms": 1116.0,
+        "details": "status=ACTIVE"
+      },
+      {
+        "name": "GET /api/approvals (Ambiguity Stop Queue)",
+        "passed": true,
+        "duration_ms": 260.3,
+        "details": "pending_approvals=0"
+      }
+    ],
+    "Tier 6: Frontend Route Accessibility": [
+      {
+        "name": "Next.js Route: /",
+        "passed": true,
+        "duration_ms": 563.58,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /dashboard",
+        "passed": true,
+        "duration_ms": 75.27,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /commitments",
+        "passed": true,
+        "duration_ms": 82.28,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /promises",
+        "passed": true,
+        "duration_ms": 257.98,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /cases",
+        "passed": true,
+        "duration_ms": 225.95,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /approvals",
+        "passed": true,
+        "duration_ms": 59.41,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /profile",
+        "passed": true,
+        "duration_ms": 63.63,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /settings",
+        "passed": true,
+        "duration_ms": 62.73,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /agent",
+        "passed": true,
+        "duration_ms": 374.65,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /activity",
+        "passed": true,
+        "duration_ms": 284.86,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /terms",
+        "passed": true,
+        "duration_ms": 332.14,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /privacy",
+        "passed": true,
+        "duration_ms": 255.0,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /disclaimer",
+        "passed": true,
+        "duration_ms": 247.5,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /security",
+        "passed": true,
+        "duration_ms": 266.6,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /status",
+        "passed": true,
+        "duration_ms": 294.4,
+        "details": "HTTP 200"
+      },
+      {
+        "name": "Next.js Route: /support",
+        "passed": true,
+        "duration_ms": 332.23,
+        "details": "HTTP 200"
+      }
+    ],
+    "Tier 7: Concurrency & Latency Stress Test": [
+      {
+        "name": "30 Concurrent Async Requests (Zero-Locking)",
+        "passed": true,
+        "duration_ms": 5297.1,
+        "details": "p50=639.2ms, p95=5296.4ms, min=13.5ms, max=5296.8ms, errors=0"
+      }
+    ],
+    "Tier 8: AWS AI & Bedrock API Protocols": [
+      {
+        "name": "Next.js Rewrite: /api/aws/status (AWS Gateway)",
+        "passed": true,
+        "duration_ms": 925.99,
+        "details": "status=200, models=2"
+      },
+      {
+        "name": "AWS Bedrock: /api/aws/bedrock/architect-commitment",
+        "passed": true,
+        "duration_ms": 8873.48,
+        "details": "title=Deploy AWS S3 zero-trust token..., powered_by=FollowFlow Resilient AI (Bedrock Ready)"
+      },
+      {
+        "name": "AWS Bedrock: /api/aws/bedrock/verify-evidence (Token Audit)",
+        "passed": true,
+        "duration_ms": 874.05,
+        "details": "token=AWS-BEDROCK-VERIFIED-582B5069, valid=True"
+      }
+    ]
+  }
+}

@@ -9,7 +9,7 @@ from typing import Optional
 from strands import Agent
 from strands.models.ollama import OllamaModel
 from config import get_settings
-from agent.tools import ALL_TOOLS, TOOL_NAMES
+from agent.tools import ALL_TOOLS, TOOL_NAMES, log_activity
 from agent.prompts import SYSTEM_PROMPT
 from services.supabase_client import supabase
 import structlog

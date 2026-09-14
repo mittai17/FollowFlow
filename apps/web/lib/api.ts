@@ -137,6 +137,52 @@ export const connectIntegration = (provider: string, identifier: string) =>
     body: JSON.stringify({ provider, identifier }),
   });
 
+// ── AWS AI & Amazon Bedrock ───────────────────────────────────────────────────
+export interface AwsAiStatus {
+  service: string;
+  timestamp: string;
+  aws_ai: {
+    status: string;
+    error?: string;
+    region: string;
+    bedrock_model: string;
+    provider: string;
+    remediation?: string;
+  };
+  supported_models: Array<{
+    id: string;
+    name: string;
+    recommended: boolean;
+    latency: string;
+    purpose: string;
+  }>;
+}
+
+export const getAwsAiStatus = () => req<AwsAiStatus>('/api/aws/status');
+export const invokeBedrock = (prompt: string, system?: string, modelId?: string) =>
+  req<any>('/api/aws/bedrock/invoke', {
+    method: 'POST',
+    body: JSON.stringify({ prompt, system, model_id: modelId }),
+  });
+export const verifyEvidenceWithBedrock = (data: {
+  title: string;
+  evidence_type: string;
+  evidence_url: string;
+  description?: string;
+}) =>
+  req<{
+    is_valid: boolean;
+    confidence: number;
+    reasoning: string;
+    verification_badge: string;
+    verification_token: string;
+    verified_at: string;
+    verified_by: string;
+  }>('/api/aws/bedrock/verify-evidence', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
 // ── Social & Community ──────────────────────────────────────────────────────
 export const getFeed = () => req<FeedItem[]>('/api/feed');
 export const getChallenges = () => req<Challenge[]>('/api/challenges');
