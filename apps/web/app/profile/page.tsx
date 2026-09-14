@@ -7,7 +7,7 @@ import {
   type ProfileData, type ScoringRules, type User
 } from '@/lib/api';
 import { Card, Skeleton, ProgressBar } from '@/components/ui/index';
-import { formatDate } from '@/lib/utils';
+import { formatDate, cn } from '@/lib/utils';
 import {
   ShieldCheck, CheckCircle2, Award, Flame, Calendar,
   HelpCircle, ExternalLink, X, Lock, Copy, Check,

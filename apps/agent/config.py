@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5:1.5b"
     strands_model_provider: str = "ollama"
+    bedrock_model_id: str = "anthropic.claude-3-haiku-20240307-v1:0"
 
     smtp_host: str = "localhost"
     smtp_port: int = 1025

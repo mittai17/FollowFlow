@@ -203,11 +203,11 @@ async def create_commitment(body: CommitmentCreate):
     if body.deadline:
         data["deadline"] = body.deadline.isoformat()
     
-    res = supabase().table("commitments").insert(data).execute()
+    res = await asyncio.to_thread(supabase().table("commitments").insert(data).execute)
     commitment = res.data[0] if res.data else {}
     
     # Log agent event
-    supabase().table("agent_events").insert({
+    await asyncio.to_thread(supabase().table("agent_events").insert({
         "commitment_id": commitment.get("id"),
         "event_type": "commitment_created",
         "description": f'Commitment recorded: "{body.title}" by @{clean_username} ({body.scope} · {body.organization_name} / {body.team_name or "General"})',
@@ -222,7 +222,7 @@ async def create_commitment(body: CommitmentCreate):
             "owner_username": clean_username,
             "integration_provider": body.integration_provider,
         },
-    }).execute()
+    }).execute)
     
     invalidate_stats_cache()
     return commitment
@@ -469,36 +469,37 @@ async def verify_commitment_evidence(id: str, evidence_url: Optional[str] = None
     }).execute().data[0]
     
     # Update commitment status to VERIFIED
-    supabase().table("commitments").update({
+    await asyncio.to_thread(supabase().table("commitments").update({
         "status": "VERIFIED",
         "progress": 100,
         "evidence_url": url,
         "updated_at": datetime.now(timezone.utc).isoformat(),
-    }).eq("id", id).execute()
+    }).eq("id", id).execute)
     
     # Log agent event
-    supabase().table("agent_events").insert({
+    await asyncio.to_thread(supabase().table("agent_events").insert({
         "commitment_id": id,
         "event_type": "evidence_verified",
         "description": f"✓ Evidence verified: {url}. Commitment marked as VERIFIED.",
         "actor_type": "agent",
         "metadata": {"checks": checks, "score_delta": "+1.0"},
-    }).execute()
+    }).execute)
     
     # Update score
     try:
-        supabase().rpc("increment_verified_count", {"delta": 1}).execute()
+        await asyncio.to_thread(supabase().rpc("increment_verified_count", {"delta": 1}).execute)
     except Exception:
         # Direct table update
-        score_data = supabase().table("scores").select("*").limit(1).execute().data
+        score_res = await asyncio.to_thread(supabase().table("scores").select("*").limit(1).execute)
+        score_data = score_res.data if score_res else []
         if score_data:
             s = score_data[0]
             new_v = s.get("verified_count", 37) + 1
-            supabase().table("scores").update({
+            await asyncio.to_thread(supabase().table("scores").update({
                 "verified_count": new_v,
                 "reliability_score": min(99, s.get("reliability_score", 94) + 1),
                 "updated_at": datetime.now(timezone.utc).isoformat(),
-            }).eq("id", s["id"]).execute()
+            }).eq("id", s["id"]).execute)
             
     return {
         "verified": True,
