@@ -1,4 +1,6 @@
 'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ShieldCheck, Clock, Zap, CheckCircle, ArrowRight,
@@ -8,6 +10,8 @@ import { Card } from '@/components/ui/index';
 import FollowFlowLogo from '@/components/ui/Logo';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const [quickPrompt, setQuickPrompt] = useState('');
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#111827]">
       <div className="max-w-6xl mx-auto px-6 py-12">
@@ -45,9 +49,41 @@ export default function LandingPage() {
             <span className="text-indigo-600">Let AI handle the follow-through.</span>
           </h1>
 
-          <p className="text-lg text-[#667085] leading-relaxed mb-8">
+          <p className="text-lg text-[#667085] leading-relaxed mb-6">
             FollowFlow is an autonomous AI operations agent that tracks commitments, monitors deadlines,
             chases missing evidence, verifies completion, and builds a transparent, verifiable record of follow-through.
+          </p>
+
+          {/* Instant Commitment Creator (Zero Friction - No Login Required) */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!quickPrompt.trim()) return;
+              router.push(`/commitments?new=true&prompt=${encodeURIComponent(quickPrompt.trim())}`);
+            }}
+            className="max-w-xl mx-auto mb-3 bg-white border border-[#E4E7EC] rounded-2xl p-2 shadow-lg shadow-indigo-100/60 flex items-center gap-2 transition-all focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100"
+          >
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 ml-1">
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+            </div>
+            <input
+              type="text"
+              value={quickPrompt}
+              onChange={(e) => setQuickPrompt(e.target.value)}
+              placeholder="e.g. Deliver the SOC2 audit draft by Friday 5 PM..."
+              className="flex-1 bg-transparent text-sm text-[#111827] placeholder:text-[#98A2B3] focus:outline-none px-2"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-colors shrink-0 flex items-center gap-1.5 shadow-sm"
+            >
+              <span>Track Promise</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </form>
+
+          <p className="text-xs text-[#98A2B3] mb-8 font-medium">
+            ✨ <span className="font-semibold text-[#667085]">Zero-barrier commitment network:</span> Anyone can create and track commitments without login.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">

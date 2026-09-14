@@ -212,6 +212,11 @@ function CommitmentsContent() {
     loadData();
     if (searchParams.get('new') === 'true') {
       setShowModal(true);
+      const initialPrompt = searchParams.get('prompt');
+      if (initialPrompt) {
+        setCopilotPrompt(initialPrompt);
+        setFormData((prev) => ({ ...prev, title: initialPrompt }));
+      }
     }
   }, [searchParams]);
 
@@ -693,11 +698,33 @@ function CommitmentsContent() {
             {/* Modal Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E4E7EC] mb-5 gap-3">
               <div>
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex flex-wrap items-center gap-2 mb-0.5">
                   <h3 className="text-lg font-black text-[#111827]">Create a Tracked Commitment</h3>
-                  <span className="text-[10px] font-mono font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">
-                    @{currentUser.username}
-                  </span>
+                  <div className="flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full text-xs">
+                    <span className="text-[10px] text-indigo-700 font-bold uppercase">Posting as:</span>
+                    <select
+                      value={currentUser.username}
+                      onChange={(e) => {
+                        const found = allUsers.find((u) => u.username === e.target.value);
+                        if (found) {
+                          setCurrentUser(found);
+                          setFormData((prev) => ({
+                            ...prev,
+                            owner_name: found.name,
+                            owner_username: found.username,
+                            role: found.title || prev.role,
+                          }));
+                        }
+                      }}
+                      className="bg-transparent text-xs font-mono font-bold text-indigo-900 focus:outline-none cursor-pointer"
+                    >
+                      {allUsers.map((u) => (
+                        <option key={u.id} value={u.username}>
+                          @{u.username} ({u.name})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <p className="text-xs text-[#667085]">
                   Define deliverables, enterprise SLA, and automated industry app verification.
