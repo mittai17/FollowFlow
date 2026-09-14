@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FollowFlowLogo, { FollowFlowIcon } from '@/components/ui/Logo';
+import { TopProgressBar } from '@/components/ui/TopProgressBar';
 
 const primaryNav = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -39,11 +40,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   // If on landing page, render clean full-width experience
   if (pathname === '/') {
-    return <main className="min-h-screen">{children}</main>;
+    return (
+      <main className="min-h-screen">
+        <Suspense fallback={null}>
+          <TopProgressBar />
+        </Suspense>
+        {children}
+      </main>
+    );
   }
 
   return (
     <div className="min-h-screen bg-[#F7F8FA]">
+      <Suspense fallback={null}>
+        <TopProgressBar />
+      </Suspense>
       {/* ── Mobile Top Bar (visible on < md) ─────────────────────────────── */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/95 backdrop-blur border-b border-[#E4E7EC] flex items-center justify-between px-4 z-40">
         <Link href="/dashboard" className="flex items-center">

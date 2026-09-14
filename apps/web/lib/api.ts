@@ -3,13 +3,128 @@ const API =
     ? ''
     : (process.env.INTERNAL_AGENT_API_URL || process.env.NEXT_PUBLIC_AGENT_API_URL || 'http://localhost:8000');
 
+// ── In-Memory & Session Caching for Sub-Millisecond Instant Load ─────────────
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+const memoryCache = new Map<string, CacheEntry<any>>();
+const FRESH_TTL_MS = 60 * 1000; // 60s fresh (0ms return)
+const STALE_TTL_MS = 10 * 60 * 1000; // 10m stale-while-revalidate
+
+export function getCached<T>(key: string): T | null {
+  if (typeof window === 'undefined') return null;
+  // 1. Check in-memory map
+  const mem = memoryCache.get(key);
+  if (mem && Date.now() - mem.timestamp < STALE_TTL_MS) {
+    return mem.data;
+  }
+  // 2. Check sessionStorage
+  try {
+    const raw = sessionStorage.getItem(`ff_cache_${key}`);
+    if (raw) {
+      const parsed: CacheEntry<T> = JSON.parse(raw);
+      if (Date.now() - parsed.timestamp < STALE_TTL_MS) {
+        memoryCache.set(key, parsed);
+        return parsed.data;
+      }
+    }
+  } catch {}
+  return null;
+}
+
+export function setCached<T>(key: string, data: T): void {
+  if (typeof window === 'undefined') return;
+  const entry: CacheEntry<T> = { data, timestamp: Date.now() };
+  memoryCache.set(key, entry);
+  try {
+    sessionStorage.setItem(`ff_cache_${key}`, JSON.stringify(entry));
+  } catch {}
+}
+
+export function invalidateCache(prefix?: string): void {
+  if (typeof window === 'undefined') return;
+  if (!prefix) {
+    memoryCache.clear();
+    try {
+      Object.keys(sessionStorage).forEach((k) => {
+        if (k.startsWith('ff_cache_')) sessionStorage.removeItem(k);
+      });
+    } catch {}
+    return;
+  }
+  for (const k of Array.from(memoryCache.keys())) {
+    if (k.includes(prefix)) memoryCache.delete(k);
+  }
+  try {
+    Object.keys(sessionStorage).forEach((k) => {
+      if (k.startsWith('ff_cache_') && k.includes(prefix)) sessionStorage.removeItem(k);
+    });
+  } catch {}
+}
+
 async function req<T>(path: string, opts?: RequestInit): Promise<T> {
+  const method = (opts?.method || 'GET').toUpperCase();
+  const isGet = method === 'GET';
+
+  // 1. Instant Cache Return for GET requests
+  if (isGet) {
+    const cached = getCached<T>(path);
+    if (cached) {
+      const mem = memoryCache.get(path);
+      const isFresh = mem && Date.now() - mem.timestamp < FRESH_TTL_MS;
+      if (isFresh) {
+        return cached; // 0ms instant return
+      }
+      // Stale-While-Revalidate: fire background fetch to update cache silently
+      fetch(`${API}${path}`, {
+        headers: { 'Content-Type': 'application/json' },
+        ...opts,
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((freshData) => {
+          if (freshData) setCached(path, freshData);
+        })
+        .catch(() => {});
+      return cached; // Return cached immediately without waiting for network!
+    }
+  }
+
+  // 2. Fetch from network
   const res = await fetch(`${API}${path}`, {
     headers: { 'Content-Type': 'application/json' },
     ...opts,
   });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return res.json();
+  const data = await res.json();
+
+  // 3. Cache successful GET responses
+  if (isGet) {
+    setCached(path, data);
+  } else {
+    // Purge corresponding cache when mutating data
+    if (path.includes('/commitments')) invalidateCache('/api/commitments');
+    if (path.includes('/users')) invalidateCache('/api/users');
+    if (path.includes('/teams')) invalidateCache('/api/teams');
+    if (path.includes('/organizations')) invalidateCache('/api/organizations');
+    if (path.includes('/approvals')) invalidateCache('/api/approvals');
+    if (path.includes('/events')) invalidateCache('/api/events');
+  }
+
+  return data;
+}
+
+export function prefetchAllCoreData() {
+  if (typeof window === 'undefined') return;
+  setTimeout(() => {
+    getCommitments().catch(() => {});
+    getCommitmentStats().catch(() => {});
+    getUsers().catch(() => {});
+    getTeams().catch(() => {});
+    getOrganizations().catch(() => {});
+    getAvailableIntegrations().catch(() => {});
+  }, 100);
 }
 
 // ── Commitments ─────────────────────────────────────────────────────────────
