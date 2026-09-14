@@ -10,7 +10,8 @@ import { Card, ProgressBar, Skeleton, EmptyState } from '@/components/ui/index';
 import { formatDate, formatDateTime, getRelativeTime, getEventIcon, cn } from '@/lib/utils';
 import {
   ArrowLeft, ShieldCheck, Clock, CheckCircle2, AlertTriangle,
-  Calendar, Globe, Lock, Users, Sparkles, Heart, RefreshCw, X, Link as LinkIcon
+  Calendar, Globe, Lock, Users, Sparkles, Heart, RefreshCw, X, Link as LinkIcon,
+  Building2, UserCheck, Github, Paperclip, ExternalLink, Download
 } from 'lucide-react';
 
 export default function CommitmentDetailPage() {
@@ -119,7 +120,7 @@ export default function CommitmentDetailPage() {
       {/* Header Card */}
       <div className="bg-white rounded-[24px] border border-[#E4E7EC] p-6 mb-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className={cn(
@@ -135,6 +136,31 @@ export default function CommitmentDetailPage() {
               >
                 {data.status.replace(/_/g, ' ')}
               </span>
+
+              {/* Scope Badge (Individual vs Team) */}
+              <span
+                className={cn(
+                  'text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase flex items-center gap-1',
+                  data.scope === 'team' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                )}
+              >
+                {data.scope === 'team' ? <Users className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
+                {data.scope === 'team' ? 'Team Commitment' : 'Individual Commitment'}
+              </span>
+
+              {/* Organization & Role */}
+              {data.organization_name && (
+                <span className="flex items-center gap-1 text-xs text-[#475467] font-medium bg-[#F7F8FA] px-2.5 py-0.5 rounded-md border border-[#E4E7EC]">
+                  <Building2 className="w-3 h-3 text-indigo-600" />
+                  <span>{data.organization_name}</span>
+                </span>
+              )}
+
+              {data.role && (
+                <span className="text-xs text-[#667085] bg-gray-100 px-2.5 py-0.5 rounded-md font-semibold">
+                  {data.role}
+                </span>
+              )}
 
               <span className="flex items-center gap-1 text-xs text-[#667085] font-medium bg-[#F7F8FA] px-2 py-0.5 rounded">
                 {data.visibility === 'public' ? (
@@ -156,9 +182,29 @@ export default function CommitmentDetailPage() {
 
             <h1 className="text-2xl font-black text-[#111827]">{data.title}</h1>
             {data.description && <p className="text-sm text-[#667085] leading-relaxed">{data.description}</p>}
+
+            {/* Team Collaborators if present */}
+            {data.scope === 'team' && data.team_members && data.team_members.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <span className="text-xs font-bold text-[#667085] flex items-center gap-1">
+                  <Users className="w-3.5 h-3.5 text-indigo-600" /> Collaborators:
+                </span>
+                {data.team_members.map((member, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 bg-indigo-50/70 border border-indigo-100 text-indigo-800 rounded-full font-medium"
+                  >
+                    <span className="w-4 h-4 rounded-full bg-indigo-200 text-indigo-900 text-[10px] font-bold flex items-center justify-center">
+                      {member.charAt(0)}
+                    </span>
+                    {member}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-2 self-start">
+          <div className="flex items-center gap-2 self-start flex-shrink-0">
             <button
               onClick={() => setShowReschedule(true)}
               className="px-3.5 py-2 border border-[#E4E7EC] text-[#111827] rounded-xl text-xs font-semibold hover:bg-[#F7F8FA] transition-colors"
@@ -204,6 +250,81 @@ export default function CommitmentDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column: Evidence & Dependencies (2 cols) */}
         <div className="md:col-span-2 space-y-6">
+          {/* GitHub Repository Connected Card */}
+          {data.github_repo && (
+            <div className="bg-white rounded-[20px] border border-gray-200 p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center">
+                    <Github className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-[#111827]">Connected GitHub Repository</h3>
+                    <p className="text-[11px] text-[#667085]">Monitored commits, pull requests, and deliverable artifacts</p>
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  <CheckCircle2 className="w-3 h-3" /> Live Tracking
+                </span>
+              </div>
+
+              <div className="p-3 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl flex items-center justify-between gap-3 text-xs font-mono">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="text-gray-500">repo:</span>
+                  <span className="font-bold text-[#111827] truncate">{data.github_repo}</span>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <a
+                    href={`https://github.com/${data.github_repo.replace('https://github.com/', '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                  >
+                    View on GitHub <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Attached Deliverables & Specifications Card */}
+          {data.file_url && (
+            <div className="bg-white rounded-[20px] border border-indigo-100 p-5 shadow-sm bg-indigo-50/20">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                    <Paperclip className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-[#111827]">Attached Deliverable / Spec</h3>
+                    <p className="text-[11px] text-[#667085]">Reference specification and proof document uploaded to vault</p>
+                  </div>
+                </div>
+                {data.file_size && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
+                    {data.file_size}
+                  </span>
+                )}
+              </div>
+
+              <div className="p-3 bg-white border border-indigo-200 rounded-xl flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 truncate">
+                  <FileText className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                  <span className="font-bold text-[#111827] truncate">{data.file_name || 'Deliverable Artifact'}</span>
+                </div>
+                <a
+                  href={data.file_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  download
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white rounded-lg font-bold text-xs hover:bg-indigo-700 transition-colors shadow-xs flex-shrink-0"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download / View
+                </a>
+              </div>
+            </div>
+          )}
+
           {/* Evidence Engine (Sections 12, 13, 37) */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
@@ -213,6 +334,31 @@ export default function CommitmentDetailPage() {
             <p className="text-xs text-[#667085] mb-4">
               A commitment cannot be marked fulfilled by assertion alone. Submit repository URLs, deliverables, or documents for automated verification.
             </p>
+
+            {/* Quick Fill suggestions if github_repo or file_url exist */}
+            {(data.github_repo || data.file_url) && (
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <span className="text-[11px] text-[#667085] font-semibold">Quick use:</span>
+                {data.github_repo && (
+                  <button
+                    type="button"
+                    onClick={() => setEvidenceUrl(`https://github.com/${data.github_repo?.replace('https://github.com/', '')}`)}
+                    className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 font-medium"
+                  >
+                    <Github className="w-3 h-3" /> Use GitHub Repo
+                  </button>
+                )}
+                {data.file_url && (
+                  <button
+                    type="button"
+                    onClick={() => setEvidenceUrl(data.file_url || '')}
+                    className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium"
+                  >
+                    <Paperclip className="w-3 h-3" /> Use Uploaded Document
+                  </button>
+                )}
+              </div>
+            )}
 
             <form onSubmit={handleVerify} className="space-y-3 mb-4">
               <div>

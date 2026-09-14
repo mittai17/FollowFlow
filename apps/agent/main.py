@@ -66,6 +66,12 @@ app.include_router(demo_router)
 app.include_router(commitments_router)
 app.include_router(social_router)
 
+import os
+from fastapi.staticfiles import StaticFiles
+UPLOAD_DIR = "/home/mittai/Projects/aws-hack/apps/agent/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
 
 @app.get("/health")
 async def health():

@@ -31,6 +31,7 @@ export const detectCommitmentAI = (text: string, personName?: string) =>
     method: 'POST',
     body: JSON.stringify({ text, person_name: personName }),
   });
+export const extractCommitment = detectCommitmentAI;
 export const verifyCommitment = (id: string, evidenceUrl?: string) =>
   req<VerificationResult>(`/api/commitments/${id}/verify`, {
     method: 'POST',
@@ -40,6 +41,54 @@ export const supportCommitment = (id: string, supporterName?: string) =>
   req<{ supported: boolean }>(`/api/commitments/${id}/support`, {
     method: 'POST',
     body: JSON.stringify({ supporter_name: supporterName }),
+  });
+
+export const uploadCommitmentFile = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${API}/api/commitments/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!res.ok) throw new Error(`Upload failed: ${res.statusText}`);
+  return res.json() as Promise<{ url: string; file_name: string; file_size: string; file_type: string }>;
+};
+
+export const connectGitHubRepo = (repo: string) =>
+  req<{
+    connected: boolean;
+    full_name: string;
+    owner: string;
+    name: string;
+    url: string;
+    stars: number;
+    language: string;
+    default_branch: string;
+    description: string;
+    is_public: boolean;
+  }>('/api/commitments/github/connect', {
+    method: 'POST',
+    body: JSON.stringify({ repo }),
+  });
+
+export const guideCommitmentAI = (prompt: string, scope = 'individual', organization = 'FollowFlow Labs', role = 'Lead Engineer') =>
+  req<{
+    title: string;
+    description: string;
+    suggested_deadline: string;
+    deadline_label: string;
+    evidence_type: string;
+    evidence_instructions: string;
+    scope: string;
+    organization_name: string;
+    role: string;
+    visibility: string;
+    clarifying_questions: string[];
+    dependencies: string[];
+    confidence: number;
+  }>('/api/commitments/ai/guide', {
+    method: 'POST',
+    body: JSON.stringify({ prompt, scope, organization, role }),
   });
 
 // ── Social & Community ──────────────────────────────────────────────────────
@@ -127,6 +176,14 @@ export interface Commitment {
   created_at: string;
   updated_at: string;
   supports?: { count: number }[];
+  scope?: 'individual' | 'team';
+  organization_name?: string;
+  role?: string;
+  team_members?: string[];
+  github_repo?: string;
+  file_url?: string;
+  file_name?: string;
+  file_size?: string;
 }
 
 export interface CommitmentStats {
@@ -158,6 +215,14 @@ export interface CreateCommitmentInput {
   evidence_type?: string;
   evidence_url?: string;
   owner_name?: string;
+  scope?: 'individual' | 'team';
+  organization_name?: string;
+  role?: string;
+  team_members?: string[];
+  github_repo?: string;
+  file_url?: string;
+  file_name?: string;
+  file_size?: string;
 }
 
 export interface DetectedCommitmentResponse {
