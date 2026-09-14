@@ -146,38 +146,40 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Bento Middle Row: FOLLOWFLOW AGENT (Full Width) */}
-      <Card className="mb-5 bg-gradient-to-r from-indigo-900 to-[#1E1B4B] text-white border-none shadow-md">
+      {/* Bento Middle Row: FOLLOWFLOW AGENT (Clean Bento UI) */}
+      <Card className="mb-5 bg-white border border-[#E4E7EC] shadow-sm">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/30 border border-indigo-400/30 flex items-center justify-center">
-              <RefreshCw className="w-5 h-5 text-indigo-200 animate-spin" />
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0">
+              <RefreshCw className="w-4 h-4 text-indigo-600 animate-spin" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-base">FOLLOWFLOW AGENT</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-xs text-emerald-300 font-mono">AUTONOMOUS</span>
+                <span className="font-bold text-sm text-[#111827]">FOLLOWFLOW AGENT</span>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 border border-emerald-200 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-emerald-700 font-mono uppercase">Autonomous</span>
+                </div>
               </div>
-              <p className="text-xs text-indigo-200 mt-0.5">
+              <p className="text-xs text-[#667085] mt-0.5">
                 Observe → Reason → Act → Wait → Re-evaluate → Escalate → Complete
               </p>
             </div>
           </div>
 
           {/* Real-time Agent Counters */}
-          <div className="flex flex-wrap items-center gap-3 md:gap-6 text-xs bg-indigo-950/60 px-4 py-2.5 rounded-xl border border-indigo-500/20">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-              <span>Watching <strong>{stats?.my_commitments ?? 18}</strong> commitments</span>
+          <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-[#667085]">
+              <span className="w-2 h-2 rounded-full bg-cyan-500 flex-shrink-0" />
+              <span>Watching <strong className="text-[#111827]">{stats?.my_commitments ?? 18}</strong> commitments</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span><strong>{stats?.scheduled_followups ?? 3}</strong> follow-ups scheduled</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-[#667085]">
+              <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
+              <span><strong className="text-[#111827]">{stats?.scheduled_followups ?? 3}</strong> follow-ups scheduled</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span><strong>{stats?.waiting_for_evidence ?? 2}</strong> evidence checks pending</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-[#667085]">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+              <span><strong className="text-[#111827]">{stats?.waiting_for_evidence ?? 2}</strong> evidence checks pending</span>
             </div>
           </div>
         </div>
