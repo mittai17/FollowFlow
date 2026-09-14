@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=https://aepvoyytbfbghigajecz.supabase.co
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlcHZveXl0YmZiZ2hpZ2FqZWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDQ2MjIsImV4cCI6MjEwMDIyMDYyMn0.RBciT5EDLMlrQwWQHA0yoV_YZI0LomSofI-wGgVuQAY
+      - NEXT_PUBLIC_AGENT_API_URL=http://agent:8000
+    depends_on:
+      - agent
+
+  agent:
+    build:
+      context: ./apps/agent
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SUPABASE_URL=https://aepvoyytbfbghigajecz.supabase.co
+      - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlcHZveXl0YmZiZ2hpZ2FqZWN6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDY0NDYyMiwiZXhwIjoyMTAwMjIwNjIyfQ.EsKD9tVIH3UvI1KdbMXxmCwC9tC4be7eq4sQ6MwzExY
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlcHZveXl0YmZiZ2hpZ2FqZWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDQ2MjIsImV4cCI6MjEwMDIyMDYyMn0.RBciT5EDLMlrQwWQHA0yoV_YZI0LomSofI-wGgVuQAY
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=qwen2.5:1.5b
+      - STRANDS_MODEL_PROVIDER=ollama
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      - CORS_ORIGINS=http://localhost:3000,http://web:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mailpit
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+networks:
+  default:
+    name: followflow
