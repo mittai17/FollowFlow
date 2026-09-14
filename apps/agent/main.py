@@ -74,11 +74,42 @@ async def health():
     }
 
 
+# ─── Amazon Bedrock AgentCore Runtime Protocol Compliance ──────────────────
+@app.get("/ping")
+async def agentcore_ping():
+    """AgentCore Runtime HTTP health check endpoint."""
+    return {"status": "Healthy"}
+
+
+@app.post("/invocations")
+async def agentcore_invocations(payload: dict):
+    """
+    AgentCore Runtime HTTP invocation endpoint.
+    Accepts task or case execution requests from AgentCore.
+    """
+    from agent.core import run_agent_for_case
+    from services.supabase_client import supabase
+    case_id = payload.get("case_id")
+    if not case_id:
+        # Retrieve the latest active or demo case if available
+        cases = supabase().table("cases").select("id").order("updated_at", desc=True).limit(1).execute().data
+        if cases:
+            case_id = cases[0]["id"]
+    
+    task = payload.get("prompt") or payload.get("task") or "Review case and verify workflow"
+    if case_id:
+        result = await run_agent_for_case(case_id, task)
+    else:
+        result = {"message": f"Received task: {task}. No active cases found to process."}
+    return {"output": result, "status": "completed"}
+
+
 @app.get("/")
 async def root():
     return {
         "message": "FollowFlow Agent API",
         "docs": "/docs",
         "health": "/health",
+        "agentcore": "/ping",
         "hackathon": "AWS Agents for Humans — Professional Agents Track",
     }

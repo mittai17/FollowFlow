@@ -58,15 +58,24 @@ TOOL_NAMES = [
 
 def _build_agent() -> Agent:
     """Build a Strands agent with the configured model and all tools."""
-    model = OllamaModel(
-        model_id=settings.ollama_model,
-        host=settings.ollama_base_url,
-    )
+    if settings.strands_model_provider == "bedrock":
+        try:
+            from strands.models import BedrockModel
+            model = BedrockModel(model_id=settings.bedrock_model_id)
+        except Exception:
+            model = OllamaModel(
+                model_id=settings.ollama_model,
+                host=settings.ollama_base_url,
+            )
+    else:
+        model = OllamaModel(
+            model_id=settings.ollama_model,
+            host=settings.ollama_base_url,
+        )
     return Agent(
         model=model,
         tools=ALL_TOOLS,
         system_prompt=SYSTEM_PROMPT,
-        max_parallel_tool_calls=1,  # Sequential for traceability
     )
 
 
