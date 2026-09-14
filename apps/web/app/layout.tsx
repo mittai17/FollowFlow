@@ -14,6 +14,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'FollowFlow — Keep your promises. Let AI handle the follow-through.',
   description: 'Autonomous AI commitment network that tracks promises, verifies evidence, and monitors deadlines.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

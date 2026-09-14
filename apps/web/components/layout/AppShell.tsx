@@ -8,6 +8,7 @@ import {
   Settings, RefreshCw, Zap, Plus, Menu, X, Building2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import FollowFlowLogo, { FollowFlowIcon } from '@/components/ui/Logo';
 
 const primaryNav = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -45,13 +46,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#F7F8FA]">
       {/* ── Mobile Top Bar (visible on < md) ─────────────────────────────── */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/95 backdrop-blur border-b border-[#E4E7EC] flex items-center justify-between px-4 z-40">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-sm">
-            ↺
-          </div>
-          <div>
-            <span className="font-bold text-[#111827] text-sm tracking-tight block">FollowFlow</span>
-          </div>
+        <Link href="/dashboard" className="flex items-center">
+          <FollowFlowLogo size={28} showWordmark={true} />
         </Link>
 
         <div className="flex items-center gap-2">
@@ -81,11 +77,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="relative w-4/5 max-w-xs bg-white h-full flex flex-col justify-between p-4 shadow-2xl z-10 animate-in slide-in-from-left duration-200">
             <div>
               <div className="flex items-center justify-between pb-4 border-b border-[#E4E7EC] mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">
-                    ↺
-                  </div>
-                  <span className="font-bold text-base text-[#111827]">FollowFlow</span>
+                <div className="flex items-center">
+                  <FollowFlowLogo size={32} showWordmark={true} />
                 </div>
                 <button onClick={() => setDrawerOpen(false)} className="p-1 rounded-lg hover:bg-gray-100">
                   <X className="w-5 h-5 text-[#667085]" />
@@ -161,14 +154,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {/* ── Desktop Fixed Sidebar (hidden on < md, visible on md+) ──────── */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-[#E4E7EC] flex-col z-40">
         <div className="px-5 py-4 border-b border-[#E4E7EC]">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-200">
-              <RefreshCw className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <span className="font-bold text-[#111827] text-base tracking-tight block">FollowFlow</span>
-              <span className="text-[10px] text-[#667085] font-medium leading-none block">Commitment Network</span>
-            </div>
+          <Link href="/dashboard" className="block">
+            <FollowFlowLogo size={34} subtitle="Commitment Network" />
           </Link>
           <div className="mt-2.5 pt-2 border-t border-[#E4E7EC]/60 flex items-center justify-between">
             <div className="flex items-center gap-1.5">

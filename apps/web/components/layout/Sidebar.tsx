@@ -7,6 +7,7 @@ import {
   Settings, RefreshCw, Zap, Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import FollowFlowLogo from '@/components/ui/Logo';
 
 const primaryNav = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -30,14 +31,8 @@ export default function Sidebar() {
     <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-[#E4E7EC] flex flex-col z-40">
       {/* Brand Header */}
       <div className="px-5 py-4 border-b border-[#E4E7EC]">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-200">
-            <RefreshCw className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <span className="font-bold text-[#111827] text-base tracking-tight block">FollowFlow</span>
-            <span className="text-[10px] text-[#667085] font-medium leading-none block">Commitment Network</span>
-          </div>
+        <Link href="/dashboard" className="block">
+          <FollowFlowLogo size={34} subtitle="Commitment Network" />
         </Link>
         <div className="mt-2 flex items-center justify-between">
           <div className="flex items-center gap-1.5">

@@ -1,0 +1,17 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ff-grad-primary" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#6366F1" />
+      <stop offset="50%" stopColor="#4F46E5" />
+      <stop offset="100%" stopColor="#06B6D4" />
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="14" fill="url(#ff-grad-primary)" />
+  <rect width="48" height="48" rx="14" fill="black" fill-opacity="0.06" />
+  <path d="M14 22C14 16.4772 18.4772 12 24 12C28.2 12 31.8 14.6 33.2 18.3L29.5 19.8C28.5 17.5 26.4 16 24 16C20.6863 16 18 18.6863 18 22C18 23.4 18.5 24.7 19.3 25.7L16.2 28.1C14.8 26.5 14 24.3 14 22Z" fill="white" fill-opacity="0.95" />
+  <path d="M34 26C34 31.5228 29.5228 36 24 36C19.8 36 16.2 33.4 14.8 29.7L18.5 28.2C19.5 30.5 21.6 32 24 32C27.3137 32 30 29.3137 30 26C30 24.6 29.5 23.3 28.7 22.3L31.8 19.9C33.2 21.5 34 23.7 34 26Z" fill="white" fill-opacity="0.85" />
+  <path d="M31 13L36 18L31 23" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M17 35L12 30L17 25" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="24" cy="24" r="3.5" fill="#38BDF8" />
+  <circle cx="24" cy="24" r="1.5" fill="white" />
+</svg>

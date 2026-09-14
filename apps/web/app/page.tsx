@@ -5,6 +5,7 @@ import {
   Brain, FileCheck, Trophy, Sparkles, MessageSquare, Lock, Activity
 } from 'lucide-react';
 import { Card } from '@/components/ui/index';
+import FollowFlowLogo from '@/components/ui/Logo';
 
 export default function LandingPage() {
   return (
@@ -28,14 +29,8 @@ export default function LandingPage() {
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Navigation / Header */}
         <header className="flex items-center justify-between mb-16">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-indigo-200">
-              ↺
-            </div>
-            <div>
-              <span className="text-xl font-black tracking-tight text-[#111827]">FollowFlow</span>
-              <span className="text-xs text-[#667085] block font-medium">Autonomous Commitment Network</span>
-            </div>
+          <div className="flex items-center">
+            <FollowFlowLogo size={42} subtitle="Autonomous Commitment Network" />
           </div>
           <div className="flex items-center gap-3">
             <Link
