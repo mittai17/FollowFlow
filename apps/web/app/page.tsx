@@ -10,22 +10,6 @@ import FollowFlowLogo from '@/components/ui/Logo';
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#111827]">
-      {/* Top Bar Banner */}
-      <div className="bg-indigo-900 text-white px-6 py-2 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2">
-          <span className="bg-indigo-600 px-2 py-0.5 rounded font-bold uppercase tracking-wider text-[10px]">
-            AWS Hackathon
-          </span>
-          <span>AWS Agents for Humans — Professional Agents Track</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-indigo-200">Powered by Strands Agents SDK & AWS Bedrock</span>
-          <Link href="/dashboard" className="underline font-semibold hover:text-white flex items-center gap-1">
-            <Zap className="w-3 h-3 text-amber-400" /> Live on AWS ECS →
-          </Link>
-        </div>
-      </div>
-
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Navigation / Header */}
         <header className="flex items-center justify-between mb-16">
