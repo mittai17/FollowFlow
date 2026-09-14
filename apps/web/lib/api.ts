@@ -9,63 +9,74 @@ async function req<T>(path: string, opts?: RequestInit): Promise<T> {
   return res.json();
 }
 
-// Dashboard
-export const getStats = () => req<DashboardStats>('/api/cases/stats');
+// ── Commitments ─────────────────────────────────────────────────────────────
+export const getCommitments = (params?: { visibility?: string; status?: string; risk?: string; search?: string }) => {
+  const q = new URLSearchParams();
+  if (params?.visibility) q.append('visibility', params.visibility);
+  if (params?.status) q.append('status', params.status);
+  if (params?.risk) q.append('risk', params.risk);
+  if (params?.search) q.append('search', params.search);
+  const qs = q.toString();
+  return req<Commitment[]>(`/api/commitments${qs ? `?${qs}` : ''}`);
+};
 
-// Cases
-export const getCases = (status?: string) =>
-  req<Case[]>(`/api/cases${status ? `?status=${status}` : ''}`);
-export const getCase = (id: string) => req<Case>(`/api/cases/${id}`);
-export const createCase = (data: CreateCaseInput) =>
-  req<Case>('/api/cases', { method: 'POST', body: JSON.stringify(data) });
-export const getCaseRequirements = (id: string) =>
-  req<Requirement[]>(`/api/cases/${id}/requirements`);
-export const getCasePromises = (id: string) =>
-  req<Promise_[]>(`/api/cases/${id}/promises`);
-export const getCaseEvents = (id: string) =>
-  req<Event_[]>(`/api/cases/${id}/events`);
-
-// Promises
-export const getPromises = (status?: string) =>
-  req<Promise_[]>(`/api/promises${status ? `?status=${status}` : ''}`);
-export const extractCommitment = (message: string, personName?: string) =>
-  req<CommitmentResult>('/api/promises/extract', {
+export const getCommitmentStats = () => req<CommitmentStats>('/api/commitments/stats');
+export const getCommitmentDetail = (id: string) => req<CommitmentDetail>(`/api/commitments/${id}`);
+export const createCommitment = (data: CreateCommitmentInput) =>
+  req<Commitment>('/api/commitments', { method: 'POST', body: JSON.stringify(data) });
+export const updateCommitment = (id: string, data: Partial<Commitment>) =>
+  req<Commitment>(`/api/commitments/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const detectCommitmentAI = (text: string, personName?: string) =>
+  req<DetectedCommitmentResponse>('/api/commitments/detect', {
     method: 'POST',
-    body: JSON.stringify({ message, person_name: personName }),
+    body: JSON.stringify({ text, person_name: personName }),
+  });
+export const verifyCommitment = (id: string, evidenceUrl?: string) =>
+  req<VerificationResult>(`/api/commitments/${id}/verify`, {
+    method: 'POST',
+    body: JSON.stringify({ evidence_url: evidenceUrl }),
+  });
+export const supportCommitment = (id: string, supporterName?: string) =>
+  req<{ supported: boolean }>(`/api/commitments/${id}/support`, {
+    method: 'POST',
+    body: JSON.stringify({ supporter_name: supporterName }),
   });
 
-// Documents
-export const getDocuments = (caseId?: string) =>
-  req<Document_[]>(`/api/documents${caseId ? `?case_id=${caseId}` : ''}`);
+// ── Social & Community ──────────────────────────────────────────────────────
+export const getFeed = () => req<FeedItem[]>('/api/feed');
+export const getChallenges = () => req<Challenge[]>('/api/challenges');
+export const joinChallenge = (id: string, userName?: string) =>
+  req<{ joined: boolean }>(`/api/challenges/${id}/join`, {
+    method: 'POST',
+    body: JSON.stringify({ user_name: userName }),
+  });
+export const getProfile = (username = 'Rahul Kumar') =>
+  req<ProfileData>(`/api/profile/${encodeURIComponent(username)}`);
+export const getScoringRules = () => req<ScoringRules>('/api/scoring/rules');
 
-// Approvals
-export const getApprovals = (status = 'pending') =>
-  req<Approval[]>(`/api/approvals?status=${status}`);
+// ── Legacy / Compatibility ──────────────────────────────────────────────────
+export const getStats = () => req<any>('/api/cases/stats');
+export const getCases = () => req<any[]>('/api/cases');
+export const getCase = (id: string) => req<any>(`/api/cases/${id}`);
+export const getCaseRequirements = (id: string) => req<any[]>(`/api/cases/${id}/requirements`);
+export const getCasePromises = (id: string) => req<any[]>(`/api/cases/${id}/promises`);
+export const getCaseEvents = (id: string) => req<any[]>(`/api/cases/${id}/events`);
+export const getPromises = (status?: string) => req<any[]>(`/api/promises${status ? `?status=${status}` : ''}`);
+export const getDocuments = () => req<any[]>('/api/documents');
+export const getApprovals = (status = 'pending') => req<any[]>(`/api/approvals?status=${status}`);
 export const decideApproval = (id: string, decision: string) =>
   req<{ success: boolean }>(`/api/approvals/${id}/decide`, {
     method: 'POST',
     body: JSON.stringify({ decision }),
   });
-
-// Events
 export const getEvents = (limit = 50, actorType?: string) =>
-  req<Event_[]>(`/api/events?limit=${limit}${actorType ? `&actor_type=${actorType}` : ''}`);
+  req<any[]>(`/api/events?limit=${limit}${actorType ? `&actor_type=${actorType}` : ''}`);
+export const getAgentStatus = () => req<any>('/api/agent/status');
+export const resetDemo = () => req<{ reset: boolean }>('/api/demo/reset', { method: 'DELETE' });
 
-// Agent
-export const getAgentStatus = () => req<AgentStatus>('/api/agent/status');
-
-// Demo
-export const resetDemo = () =>
-  req<{ reset: boolean }>('/api/demo/reset', { method: 'DELETE' });
-export const getDemoStatus = () => req<{ cases: Case[] }>('/api/demo/status');
-
-// SSE
-export const streamDemo = (onEvent: (data: DemoStep) => void, onDone: () => void) => {
-  const es = new EventSource(`${API}/api/demo/run`);
-  // EventSource only supports GET; use fetch for POST SSE
-  es.close();
-  // Use fetch for POST SSE
-  fetch(`${API}/api/demo/run`, { method: 'POST' }).then(async (res) => {
+// ── SSE Demo Streamer ───────────────────────────────────────────────────────
+export const streamDemo = (onEvent: (data: any) => void, onDone: () => void, speed = 'Normal') => {
+  fetch(`${API}/api/demo/run?speed=${speed}`, { method: 'POST' }).then(async (res) => {
     const reader = res.body!.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -81,138 +92,162 @@ export const streamDemo = (onEvent: (data: DemoStep) => void, onDone: () => void
         try { onEvent(JSON.parse(raw)); } catch {}
       }
     }
-  });
+  }).catch(() => onDone());
 };
 
-// Types
-export interface DashboardStats {
-  active_cases: number;
-  waiting_cases: number;
-  at_risk_cases: number;
-  blocked_cases: number;
-  completed_today: number;
-  promises_tracked: number;
-  pending_approvals: number;
-  documents_verified: number;
-}
-
-export interface Case {
+// ── Types ───────────────────────────────────────────────────────────────────
+export interface Commitment {
   id: string;
-  case_number?: string;
-  title: string;
-  description?: string;
-  status: string;
-  risk: string;
-  progress: number;
-  deadline?: string;
   owner_id?: string;
-  organization_id?: string;
-  created_at: string;
-  updated_at: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface CreateCaseInput {
+  owner_name: string;
   title: string;
   description?: string;
   deadline?: string;
-}
-
-export interface Requirement {
-  id: string;
-  case_id: string;
-  name: string;
-  description?: string;
-  status: string;
-  required_evidence?: string;
-  document_id?: string;
-  sort_order: number;
-  completed_at?: string;
-  created_at: string;
-}
-
-export interface Promise_ {
-  id: string;
-  case_id: string;
-  person_name?: string;
-  commitment: string;
-  original_message?: string;
-  deadline?: string;
-  status: string;
-  evidence_required?: string;
-  confidence: number;
-  follow_up_count: number;
-  last_follow_up_at?: string;
+  visibility: 'private' | 'shared' | 'public';
+  status:
+    | 'DRAFT'
+    | 'ACTIVE'
+    | 'UPCOMING'
+    | 'DUE_SOON'
+    | 'DUE_TODAY'
+    | 'WAITING_FOR_EVIDENCE'
+    | 'FULFILLED'
+    | 'VERIFIED'
+    | 'RESCHEDULED'
+    | 'AT_RISK'
+    | 'MISSED'
+    | 'CANCELLED'
+    | 'DISPUTED';
+  risk: 'low' | 'medium' | 'high' | 'critical';
+  evidence_type?: string;
+  evidence_url?: string;
+  score_weight: number;
+  progress: number;
+  rescheduled_reason?: string;
   created_at: string;
   updated_at: string;
+  supports?: { count: number }[];
 }
 
-export interface Document_ {
-  id: string;
-  case_id: string;
-  name: string;
-  document_type?: string;
-  verification_status: string;
-  verification_notes?: string;
-  storage_path?: string;
-  uploaded_at: string;
-  verified_at?: string;
+export interface CommitmentStats {
+  my_commitments: number;
+  active_count: number;
+  due_soon: number;
+  at_risk: number;
+  waiting_for_evidence: number;
+  verified_count: number;
+  streak_days: number;
+  reliability_score: number;
+  pending_approvals: number;
+  scheduled_followups: number;
+  agent_status: string;
 }
 
-export interface Approval {
-  id: string;
-  case_id: string;
-  reason: string;
-  recommendation: string;
-  options: string[];
-  status: string;
-  confidence: number;
-  decision?: string;
-  context_data?: Record<string, unknown>;
-  created_at: string;
-  resolved_at?: string;
-  cases?: { title: string; case_number?: string };
+export interface CommitmentDetail extends Commitment {
+  evidence: any[];
+  agent_events: any[];
+  supports: any[];
+  support_count: number;
 }
 
-export interface Event_ {
-  id: string;
-  case_id?: string;
-  event_type: string;
-  actor: string;
-  actor_type: string;
+export interface CreateCommitmentInput {
   title: string;
   description?: string;
-  metadata?: Record<string, unknown>;
-  created_at: string;
+  deadline?: string;
+  visibility: string;
+  evidence_type?: string;
+  evidence_url?: string;
+  owner_name?: string;
 }
 
-export interface AgentStatus {
-  status: string;
-  current_case?: string;
-  current_action?: string;
-  last_action_at?: string;
-  queue_size: number;
-  scheduled_count: number;
-  tools: string[];
-}
-
-export interface CommitmentResult {
+export interface DetectedCommitmentResponse {
   is_commitment: boolean;
-  person?: string;
-  commitment?: string;
-  deadline?: string;
-  evidence_required?: string;
+  commitments: {
+    title: string;
+    owner: string;
+    deadline?: string;
+    evidence_required?: string;
+    evidence_type?: string;
+    visibility: string;
+    confidence: number;
+  }[];
+  dependency?: string;
   confidence: number;
-  original_message?: string;
 }
 
-export interface DemoStep {
-  step: number | string;
+export interface VerificationResult {
+  verified: boolean;
+  status: string;
+  evidence: any;
+  checks: Record<string, any>;
+  score_updated: boolean;
+}
+
+export interface FeedItem extends Commitment {
+  support_count: number;
+  supporters: string[];
+  verified_evidence?: any;
+  is_verified: boolean;
+}
+
+export interface Challenge {
+  id: string;
   title: string;
   description: string;
-  event_type: string;
-  timestamp: string;
-  data: Record<string, unknown>;
-  case_id?: string;
-  error?: string;
+  goal: string;
+  start_date: string;
+  end_date: string;
+  participant_count: number;
+  completion_rate: number;
+  top_streak: number;
+  members: {
+    id: string;
+    user_name: string;
+    progress: number;
+    streak: number;
+    status: string;
+  }[];
+}
+
+export interface ProfileData {
+  user: {
+    name: string;
+    title: string;
+    avatar_url?: string;
+    bio: string;
+  };
+  score: {
+    reliability_score: number;
+    total_count: number;
+    fulfilled_count: number;
+    missed_count: number;
+    rescheduled_count: number;
+    verified_count: number;
+    on_time_rate: number;
+    fulfillment_rate: number;
+    verified_rate: number;
+    consistency_rate: number;
+    streak_days: number;
+  };
+  badges: {
+    type: string;
+    label: string;
+    description: string;
+  }[];
+  recent_verified: Commitment[];
+  active_commitments: Commitment[];
+  verified_by: string;
+}
+
+export interface ScoringRules {
+  title: string;
+  summary: string;
+  rules: {
+    event: string;
+    delta: string;
+    description: string;
+    color: string;
+  }[];
+  formula: string;
+  safeguards: string[];
 }

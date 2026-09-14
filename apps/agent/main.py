@@ -10,6 +10,8 @@ from api.cases import router as cases_router
 from api.promises import router as promises_router
 from api.routes import docs_router, approvals_router, events_router, agent_router
 from api.demo import router as demo_router
+from api.commitments import router as commitments_router
+from api.social import router as social_router
 import structlog
 
 log = structlog.get_logger()
@@ -61,6 +63,8 @@ app.include_router(approvals_router)
 app.include_router(events_router)
 app.include_router(agent_router)
 app.include_router(demo_router)
+app.include_router(commitments_router)
+app.include_router(social_router)
 
 
 @app.get("/health")

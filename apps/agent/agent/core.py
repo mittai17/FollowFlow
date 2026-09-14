@@ -9,15 +9,7 @@ from typing import Optional
 from strands import Agent
 from strands.models.ollama import OllamaModel
 from config import get_settings
-from agent.tools import (
-    get_case, update_case, get_requirements, update_requirement,
-    extract_commitment, create_promise, update_promise, verify_promise,
-    list_documents, verify_document,
-    send_email, schedule_followup, check_deadlines,
-    get_dependencies,
-    request_human_approval, resume_case,
-    log_activity, complete_case,
-)
+from agent.tools import ALL_TOOLS, TOOL_NAMES
 from agent.prompts import SYSTEM_PROMPT
 from services.supabase_client import supabase
 import structlog
@@ -25,7 +17,6 @@ import structlog
 log = structlog.get_logger()
 settings = get_settings()
 
-# Agent state (in-memory for demo; production would use Redis)
 _agent_state: dict = {
     "status": "online",
     "current_case": None,
@@ -34,26 +25,6 @@ _agent_state: dict = {
     "queue": [],
     "scheduled_count": 0,
 }
-
-ALL_TOOLS = [
-    get_case, update_case, get_requirements, update_requirement,
-    extract_commitment, create_promise, update_promise, verify_promise,
-    list_documents, verify_document,
-    send_email, schedule_followup, check_deadlines,
-    get_dependencies,
-    request_human_approval, resume_case,
-    log_activity, complete_case,
-]
-
-TOOL_NAMES = [
-    "get_case", "update_case", "get_requirements", "update_requirement",
-    "extract_commitment", "create_promise", "update_promise", "verify_promise",
-    "list_documents", "verify_document",
-    "send_email", "schedule_followup", "check_deadlines",
-    "get_dependencies",
-    "request_human_approval", "resume_case",
-    "log_activity", "complete_case",
-]
 
 
 def _build_agent() -> Agent:

@@ -2,80 +2,146 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, Briefcase, MessageSquare, FileText,
-  CheckCircle, Activity, Bot, Settings, RefreshCw, Zap
+  LayoutDashboard, CheckSquare, MessageSquare, Trophy,
+  Compass, User, Activity, CheckCircle2, ShieldCheck,
+  Settings, RefreshCw, Zap, Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const nav = [
+const primaryNav = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { href: '/cases', label: 'Cases', icon: Briefcase },
+  { href: '/commitments', label: 'My Commitments', icon: CheckSquare },
   { href: '/promises', label: 'Promises', icon: MessageSquare },
-  { href: '/documents', label: 'Documents', icon: FileText },
-  { href: '/approvals', label: 'Approvals', icon: CheckCircle },
-  { href: '/activity', label: 'Activity', icon: Activity },
-  { href: '/agent', label: 'Agent', icon: Bot },
+  { href: '/challenges', label: 'Challenges', icon: Trophy },
+  { href: '/feed', label: 'Feed', icon: Compass },
+  { href: '/profile', label: 'Profile', icon: User },
+];
+
+const agentNav = [
+  { href: '/activity', label: 'Agent Activity', icon: Activity },
+  { href: '/approvals', label: 'Approvals', icon: CheckCircle2 },
+  { href: '/verification', label: 'Verification', icon: ShieldCheck },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-white border-r border-[#E4E7EC] flex flex-col z-40">
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-[#E4E7EC]">
+    <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-[#E4E7EC] flex flex-col z-40">
+      {/* Brand Header */}
+      <div className="px-5 py-4 border-b border-[#E4E7EC]">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-200">
             <RefreshCw className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-[#111827] text-lg tracking-tight">FollowFlow</span>
+          <div>
+            <span className="font-bold text-[#111827] text-base tracking-tight block">FollowFlow</span>
+            <span className="text-[10px] text-[#667085] font-medium leading-none block">Commitment Network</span>
+          </div>
         </Link>
-        <div className="mt-1.5 flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs text-[#667085]">Agent Online</span>
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs text-[#667085] font-medium">Agent Autonomous</span>
+          </div>
+          <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold">AWS</span>
         </div>
       </div>
 
-      {/* Demo Banner */}
-      <Link href="/demo" className="mx-3 mt-3 px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center gap-2 hover:bg-indigo-100 transition-colors">
-        <Zap className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
-        <span className="text-xs font-medium text-indigo-700">Run Live Demo</span>
-      </Link>
+      {/* Quick Action Button */}
+      <div className="p-3 space-y-1.5">
+        <Link
+          href="/commitments?new=true"
+          className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100"
+        >
+          <Plus className="w-3.5 h-3.5" /> Make a Commitment
+        </Link>
+        <Link
+          href="/demo"
+          className="w-full flex items-center justify-center gap-2 py-1.5 px-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-medium text-amber-800 hover:bg-amber-100 transition-colors"
+        >
+          <Zap className="w-3 h-3 text-amber-600" /> Run Autonomous Demo
+        </Link>
+      </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {nav.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + '/');
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
-                active
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-[#667085] hover:text-[#111827] hover:bg-[#F7F8FA]'
-              )}
-            >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              {label}
-            </Link>
-          );
-        })}
+      {/* Nav List */}
+      <nav className="flex-1 px-3 py-1 space-y-4 overflow-y-auto">
+        <div>
+          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#98A2B3] mb-1">Commitments</p>
+          <div className="space-y-0.5">
+            {primaryNav.map(({ href, label, icon: Icon }) => {
+              const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href + '/'));
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all',
+                    active
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-[#667085] hover:text-[#111827] hover:bg-[#F7F8FA]'
+                  )}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#98A2B3] mb-1">AI Operations</p>
+          <div className="space-y-0.5">
+            {agentNav.map(({ href, label, icon: Icon }) => {
+              const active = pathname === href || pathname.startsWith(href + '/');
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all',
+                    active
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-[#667085] hover:text-[#111827] hover:bg-[#F7F8FA]'
+                  )}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </nav>
 
-      {/* Bottom */}
-      <div className="px-3 pb-4 border-t border-[#E4E7EC] pt-3">
-        <Link href="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#667085] hover:text-[#111827] hover:bg-[#F7F8FA] transition-all">
+      {/* Bottom Profile & Settings */}
+      <div className="px-3 pb-3 border-t border-[#E4E7EC] pt-2 space-y-1">
+        <Link
+          href="/settings"
+          className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#667085] hover:text-[#111827] hover:bg-[#F7F8FA] transition-all"
+        >
           <Settings className="w-4 h-4" />
           Settings
         </Link>
-        <div className="mt-2 px-3 py-2 flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600">A</div>
-          <div>
-            <p className="text-xs font-medium text-[#111827]">Demo Account</p>
-            <p className="text-[10px] text-[#98A2B3]">Hackathon Mode</p>
+        <Link
+          href="/profile"
+          className="px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl flex items-center justify-between hover:border-indigo-200 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
+              R
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-[#111827]">Rahul Kumar</p>
+              <p className="text-[10px] text-[#667085]">Verified Finisher</p>
+            </div>
           </div>
-        </div>
+          <div className="text-right">
+            <span className="text-xs font-bold text-emerald-600">94%</span>
+            <span className="text-[9px] text-[#98A2B3] block">Reliability</span>
+          </div>
+        </Link>
       </div>
     </aside>
   );
