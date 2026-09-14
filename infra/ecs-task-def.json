@@ -42,6 +42,10 @@
           "value": "bedrock"
         },
         {
+          "name": "BEDROCK_MODEL_ID",
+          "value": "anthropic.claude-3-haiku-20240307-v1:0"
+        },
+        {
           "name": "CORS_ORIGINS",
           "value": "*"
         }
@@ -77,6 +81,10 @@
         },
         {
           "name": "NEXT_PUBLIC_AGENT_API_URL",
+          "value": "http://localhost:8000"
+        },
+        {
+          "name": "INTERNAL_AGENT_API_URL",
           "value": "http://localhost:8000"
         }
       ],
