@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -8,10 +8,29 @@ import {
 } from 'lucide-react';
 import { Card } from '@/components/ui/index';
 import FollowFlowLogo from '@/components/ui/Logo';
+import { getAuthUser, isAuthenticated } from '@/lib/auth';
+import type { User } from '@/lib/api';
 
 export default function LandingPage() {
   const router = useRouter();
   const [quickPrompt, setQuickPrompt] = useState('');
+  const [authUser, setAuthUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    setAuthUser(getAuthUser());
+  }, []);
+
+  const handleTrackPromise = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickPrompt.trim()) return;
+    const dest = `/commitments?new=true&prompt=${encodeURIComponent(quickPrompt.trim())}`;
+    if (isAuthenticated()) {
+      router.push(dest);
+    } else {
+      router.push(`/login?redirect=${encodeURIComponent(dest)}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#111827]">
       <div className="max-w-6xl mx-auto px-6 py-12">
@@ -21,18 +40,41 @@ export default function LandingPage() {
             <FollowFlowLogo size={42} subtitle="Autonomous Commitment Network" />
           </div>
           <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="px-4 py-2 text-sm font-semibold text-[#667085] hover:text-[#111827] transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/dashboard"
-              className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
-            >
-              Open Workspace
-            </Link>
+            {authUser ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-2 text-sm font-semibold text-[#667085] hover:text-[#111827] transition-colors flex items-center gap-2"
+                >
+                  <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">
+                    {authUser.name.charAt(0)}
+                  </div>
+                  <span>{authUser.name}</span>
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 flex items-center gap-1.5"
+                >
+                  <span>Open Workspace</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-sm font-semibold text-[#667085] hover:text-[#111827] transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/login"
+                  className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
+                >
+                  Open Workspace
+                </Link>
+              </>
+            )}
           </div>
         </header>
 
@@ -54,13 +96,9 @@ export default function LandingPage() {
             chases missing evidence, verifies completion, and builds a transparent, verifiable record of follow-through.
           </p>
 
-          {/* Instant Commitment Creator (Zero Friction - No Login Required) */}
+          {/* Commitment Creator with Sign-In Wall Protection */}
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!quickPrompt.trim()) return;
-              router.push(`/commitments?new=true&prompt=${encodeURIComponent(quickPrompt.trim())}`);
-            }}
+            onSubmit={handleTrackPromise}
             className="max-w-xl mx-auto mb-3 bg-white border border-[#E4E7EC] rounded-2xl p-2 shadow-lg shadow-indigo-100/60 flex items-center gap-2 transition-all focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100"
           >
             <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 ml-1">
@@ -82,19 +120,20 @@ export default function LandingPage() {
             </button>
           </form>
 
-          <p className="text-xs text-[#98A2B3] mb-8 font-medium">
-            ✨ <span className="font-semibold text-[#667085]">Zero-barrier commitment network:</span> Anyone can create and track commitments without login.
+          <p className="text-xs text-[#98A2B3] mb-8 font-medium flex items-center justify-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 text-indigo-600" />
+            <span className="font-semibold text-[#667085]">Sign-In Wall Protected:</span> Authenticated enterprise workspace with Ed25519 commit signing.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
-              href="/commitments?new=true"
+              href={authUser ? "/commitments?new=true" : "/login?redirect=%2Fcommitments%3Fnew%3Dtrue"}
               className="px-6 py-3.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2"
             >
               Create a Commitment <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/dashboard"
+              href={authUser ? "/dashboard" : "/login?redirect=%2Fdashboard"}
               className="px-6 py-3.5 bg-white border border-[#E4E7EC] text-[#111827] rounded-xl font-bold text-sm hover:bg-[#F7F8FA] transition-all flex items-center gap-2"
             >
               <Activity className="w-4 h-4 text-indigo-600" /> Explore Live Dashboard

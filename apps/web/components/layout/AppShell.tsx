@@ -1,15 +1,29 @@
 'use client';
-import { useState, Suspense } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   LayoutDashboard, CheckSquare, MessageSquare, Trophy,
   Compass, User, Activity, CheckCircle2, ShieldCheck,
-  Settings, RefreshCw, Zap, Plus, Menu, X, Building2
+  Settings, RefreshCw, Zap, Plus, Menu, X, Building2,
+  LogOut, Shield, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FollowFlowLogo, { FollowFlowIcon } from '@/components/ui/Logo';
 import { TopProgressBar } from '@/components/ui/TopProgressBar';
+import { getAuthUser, clearAuthUser, isAuthenticated } from '@/lib/auth';
+import type { User as UserType } from '@/lib/api';
+
+const PUBLIC_PATHS = [
+  '/',
+  '/login',
+  '/terms',
+  '/privacy',
+  '/security',
+  '/status',
+  '/disclaimer',
+  '/support',
+];
 
 const primaryNav = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -36,10 +50,46 @@ const mobileBottomNav = [
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [user, setUser] = useState<UserType | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
-  // If on landing page, render clean full-width experience
-  if (pathname === '/') {
+  // Auth check & synchronization
+  useEffect(() => {
+    const current = getAuthUser();
+    setUser(current);
+
+    const isPublic = PUBLIC_PATHS.includes(pathname);
+    if (!isPublic && !current) {
+      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+    } else {
+      setIsReady(true);
+    }
+
+    const handleAuthChange = (e: any) => {
+      const updated = e.detail !== undefined ? e.detail : getAuthUser();
+      setUser(updated);
+      if (!PUBLIC_PATHS.includes(pathname) && !updated) {
+        router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+      }
+    };
+
+    window.addEventListener('followflow_auth_change', handleAuthChange);
+    return () => {
+      window.removeEventListener('followflow_auth_change', handleAuthChange);
+    };
+  }, [pathname, router]);
+
+  const handleSignOut = () => {
+    clearAuthUser();
+    setUser(null);
+    setDrawerOpen(false);
+    router.replace('/login');
+  };
+
+  // If on landing or login page, render clean full-width experience without dashboard layout
+  if (pathname === '/' || pathname === '/login') {
     return (
       <main className="min-h-screen">
         <Suspense fallback={null}>
@@ -50,11 +100,31 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Sign-in wall: block protected route rendering until authentication is confirmed
+  const isPublicPage = PUBLIC_PATHS.includes(pathname);
+  if (!isPublicPage && (!isReady || !user)) {
+    return (
+      <div className="min-h-screen bg-[#F7F8FA] flex flex-col items-center justify-center p-6 text-center">
+        <div className="animate-in fade-in zoom-in-95 duration-200 flex flex-col items-center">
+          <FollowFlowLogo size={40} subtitle="Commitment Network" />
+          <div className="mt-8 flex items-center gap-2 px-4 py-2 bg-white border border-[#E4E7EC] rounded-full text-xs font-semibold text-[#667085] shadow-xs">
+            <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />
+            <span>Verifying workspace credentials...</span>
+          </div>
+          <p className="text-[11px] text-[#98A2B3] mt-3">
+            Redirecting to FollowFlow Enterprise Sign-In
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F7F8FA]">
       <Suspense fallback={null}>
         <TopProgressBar />
       </Suspense>
+
       {/* ── Mobile Top Bar (visible on < md) ─────────────────────────────── */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/95 backdrop-blur border-b border-[#E4E7EC] flex items-center justify-between px-4 z-40">
         <Link href="/dashboard" className="flex items-center">
@@ -149,14 +219,43 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </nav>
             </div>
 
-            <div className="border-t border-[#E4E7EC] pt-3">
+            <div className="border-t border-[#E4E7EC] pt-3 space-y-2">
               <Link
                 href="/settings"
                 onClick={() => setDrawerOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-[#667085]"
+                className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-[#667085] hover:bg-gray-50 rounded-xl"
               >
                 <Settings className="w-4 h-4" /> Settings
               </Link>
+
+              {user ? (
+                <div className="p-2.5 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      {user.name.charAt(0)}
+                    </div>
+                    <div className="truncate">
+                      <p className="text-xs font-bold text-[#111827] truncate">{user.name}</p>
+                      <p className="text-[10px] text-indigo-600 font-mono">@{user.username}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="p-1.5 text-[#667085] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Sign Out"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setDrawerOpen(false)}
+                  className="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -253,24 +352,41 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <Settings className="w-4 h-4" />
             Settings
           </Link>
-          <Link
-            href="/profile"
-            className="px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl flex items-center justify-between hover:border-indigo-200 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
-                R
-              </div>
-              <div className="truncate max-w-[120px]">
-                <p className="text-xs font-bold text-[#111827] truncate">Rahul Kumar</p>
-                <p className="text-[10px] text-indigo-600 font-mono font-bold">@rahulk</p>
+
+          {/* User Profile Card with Dynamic Active User & Sign Out */}
+          {user ? (
+            <div className="px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl flex items-center justify-between hover:border-indigo-200 transition-colors group">
+              <Link href={`/profile?u=${encodeURIComponent(user.username)}`} className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
+                  {user.name.charAt(0)}
+                </div>
+                <div className="truncate max-w-[100px]">
+                  <p className="text-xs font-bold text-[#111827] truncate">{user.name}</p>
+                  <p className="text-[10px] text-indigo-600 font-mono font-bold truncate">@{user.username}</p>
+                </div>
+              </Link>
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="text-right">
+                  <span className="text-xs font-bold text-emerald-600">{user.reliability_score || 96.5}%</span>
+                  <span className="text-[8px] text-[#98A2B3] block leading-none">Trust</span>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  title="Sign Out of FollowFlow"
+                  className="p-1 rounded-lg text-[#98A2B3] hover:text-red-600 hover:bg-red-50 transition-colors ml-0.5"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
-            <div className="text-right flex-shrink-0">
-              <span className="text-xs font-bold text-emerald-600">96.5%</span>
-              <span className="text-[9px] text-[#98A2B3] block">Reliability</span>
-            </div>
-          </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-sm hover:bg-indigo-700 transition-all"
+            >
+              Sign In to Workspace
+            </Link>
+          )}
         </div>
       </aside>
 

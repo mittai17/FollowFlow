@@ -12,6 +12,7 @@ import {
   type Organization, type Team, type User,
   type IntegrationConnectResult
 } from '@/lib/api';
+import { getAuthUser } from '@/lib/auth';
 import { Card, ProgressBar, Skeleton, EmptyState } from '@/components/ui/index';
 import { formatDate, getRelativeTime, cn } from '@/lib/utils';
 import {
@@ -201,8 +202,17 @@ function CommitmentsContent() {
       setAllUsers(usrs);
 
       if (usrs.length > 0) {
-        const found = usrs.find((u) => u.username === 'rahulk') || usrs[0];
+        const auth = getAuthUser();
+        const found = (auth ? usrs.find((u) => u.username === auth.username || u.id === auth.id) : null)
+          || usrs.find((u) => u.username === 'rahulk')
+          || usrs[0];
         setCurrentUser(found);
+        setFormData((prev) => ({
+          ...prev,
+          owner_name: found.name,
+          owner_username: found.username,
+          role: found.title || found.role || prev.role,
+        }));
       }
     } catch {}
     setLoading(false);
