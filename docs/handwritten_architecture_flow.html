@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FollowFlow Handwritten Architecture Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Architects+Daughter&family=Patrick+Hand&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1600px;
+    height: 900px;
+    background-color: #FAF9F6;
+    background-image: radial-gradient(#D1D5DB 1.2px, transparent 1.2px);
+    background-size: 24px 24px;
+    font-family: 'Patrick Hand', 'Architects Daughter', cursive, sans-serif;
+    color: #1F2937;
+    position: relative;
+    overflow: hidden;
+    padding: 36px 48px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    border-bottom: 2.5px dashed #9CA3AF;
+    padding-bottom: 16px;
+  }
+  .title-group h1 {
+    font-family: 'Caveat', cursive;
+    font-size: 42px;
+    font-weight: 700;
+    color: #1E1B4B;
+    line-height: 1.1;
+  }
+  .title-group p {
+    font-size: 20px;
+    color: #4B5563;
+    margin-top: 4px;
+  }
+  .aws-badge {
+    background: #FEF3C7;
+    border: 2px dashed #D97706;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #92400E;
+    transform: rotate(2deg);
+    box-shadow: 2px 3px 0px rgba(0,0,0,0.05);
+  }
+
+  /* Diagram Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 270px 30px 360px 30px 360px 70px 330px;
+    align-items: center;
+    height: 640px;
+  }
+
+  /* Sketch Cards */
+  .card {
+    background: #FFFFFF;
+    border: 2.5px solid #374151;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 4px 5px 0px #1F2937;
+    position: relative;
+  }
+  .card-title {
+    font-family: 'Caveat', cursive;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge-phase {
+    display: inline-block;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* Sticky Notes */
+  .sticky {
+    position: absolute;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 16px;
+    box-shadow: 3px 4px 6px rgba(0,0,0,0.1);
+    line-height: 1.25;
+    z-index: 10;
+  }
+  .sticky-yellow {
+    background: #FEF9C3;
+    border: 1px solid #FDE047;
+    color: #854D0E;
+    transform: rotate(-3deg);
+  }
+  .sticky-blue {
+    background: #E0E7FF;
+    border: 1px solid #C7D2FE;
+    color: #3730A3;
+    transform: rotate(2deg);
+  }
+  .sticky-green {
+    background: #DCFCE7;
+    border: 1px solid #BBF7D0;
+    color: #166534;
+    transform: rotate(-2deg);
+  }
+
+  /* Items & Lists */
+  .item-box {
+    background: #F9FAFB;
+    border: 1.8px dashed #9CA3AF;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 17px;
+  }
+  .item-box strong {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #1F2937;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .tag {
+    display: inline-block;
+    background: #EEF2FF;
+    color: #4338CA;
+    border: 1px solid #C7D2FE;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+  }
+
+  /* Arrows */
+  .arrow-col {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .arrow-svg {
+    width: 40px;
+    height: 60px;
+  }
+
+  /* Split Decision Boxes */
+  .decision-split {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .hitl-box {
+    background: #FEF2F2;
+    border: 2px solid #DC2626;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 3px 3px 0px #DC2626;
+  }
+  .verified-box {
+    background: #F0FDF4;
+    border: 2px solid #16A34A;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 3px 3px 0px #16A34A;
+  }
+
+  /* Footer */
+  .footer {
+    position: absolute;
+    bottom: 20px;
+    left: 48px;
+    right: 48px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    color: #6B7280;
+    border-top: 1.5px dashed #D1D5DB;
+    padding-top: 10px;
+  }
+  .footer span strong {
+    color: #111827;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="title-group">
+      <h1>FollowFlow — End-to-End Autonomous Flow (Whiteboard Sketch)</h1>
+      <p>How commitments turn into verified cryptographic proof with AWS Strands Agents SDK & Amazon Bedrock</p>
+    </div>
+    <div class="aws-badge">
+      AWS Hackathon 2026<br>
+      <span style="font-size: 15px; font-weight: normal;">Professional Agents Track</span>
+    </div>
+  </div>
+
+  <!-- Main Diagram Grid -->
+  <div class="grid">
+
+    <!-- STEP 1: COMMITMENT INCEPTION -->
+    <div class="card" style="transform: rotate(-0.5deg);">
+      <span class="badge-phase" style="background: #E0E7FF; color: #3730A3;">1. Trigger</span>
+      <div class="card-title" style="color: #312E81;">💬 Promise Made</div>
+      
+      <div class="item-box" style="background: #FFFBEB; border-color: #F59E0B;">
+        <span style="font-family: 'Caveat'; font-size: 22px; color: #B45309;">"I'll deliver the SOC-2 audit draft with GitHub PR by Friday 5 PM"</span>
+      </div>
+
+      <div class="item-box">
+        <strong>Sources:</strong>
+        • Web App (Enterprise Wall)<br>
+        • Slack Channel Mention<br>
+        • Standup / Meeting Notes
+      </div>
+
+      <div class="sticky sticky-yellow" style="bottom: -22px; left: 16px;">
+        Zero tickets to fill!<br>Natural language only.
+      </div>
+    </div>
+
+    <!-- Arrow 1 -> 2 -->
+    <div class="arrow-col">
+      <svg class="arrow-svg" viewBox="0 0 40 60">
+        <path d="M 5 30 Q 20 22, 35 30" stroke="#1F2937" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M 28 22 L 36 30 L 26 36" stroke="#1F2937" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- STEP 2: STRANDS AGENT & BEDROCK -->
+    <div class="card" style="transform: rotate(0.4deg);">
+      <span class="badge-phase" style="background: #EDE9FE; color: #5B21B6;">2. Cognitive Core</span>
+      <div class="card-title" style="color: #4C1D95;">🤖 Strands SDK & Bedrock</div>
+      
+      <div class="item-box">
+        <strong>@tool extract_deliverable()</strong>
+        Identifies: <em>"SOC-2 Audit Draft"</em><br>
+        Assignee: <em>@devon_clarke</em> · SLA: <em>48h</em>
+      </div>
+
+      <div class="item-box">
+        <strong>@tool calculate_commitment_horizon()</strong>
+        T-minus timeline & Team 95% SLA Target
+      </div>
+
+      <div class="item-box" style="background: #F3F4F6;">
+        <span class="tag">Amazon Bedrock</span> <span class="tag">Claude 3.5 Sonnet</span><br>
+        <span style="font-size: 14px; color: #4B5563;">Packaged for Bedrock AgentCore (/ping & /invocations)</span>
+      </div>
+
+      <div class="sticky sticky-blue" style="top: -18px; right: -12px;">
+        ECS Fargate Container<br>Running in AWS Cloud!
+      </div>
+    </div>
+
+    <!-- Arrow 2 -> 3 -->
+    <div class="arrow-col">
+      <svg class="arrow-svg" viewBox="0 0 40 60">
+        <path d="M 5 30 Q 20 38, 35 30" stroke="#1F2937" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M 28 22 L 36 30 L 26 36" stroke="#1F2937" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- STEP 3: AUTONOMOUS POLLING & TOOLS -->
+    <div class="card" style="transform: rotate(-0.3deg);">
+      <span class="badge-phase" style="background: #FEF3C7; color: #92400E;">3. Autonomous Loop</span>
+      <div class="card-title" style="color: #78350F;">🔍 Evidence Harvesting</div>
+      
+      <div class="item-box">
+        <strong>Autonomous 5-Step Loop:</strong>
+        1. Observe ➔ 2. Reason ➔ 3. Act<br>
+        4. Wait / Poll ➔ 5. Verify
+      </div>
+
+      <div class="item-box">
+        <strong>Direct Tool Inspection:</strong>
+        <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 6px; font-size: 16px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px; line-height: 1;">🐙</span>
+            <span><strong>GitHub:</strong> Checks PR #142 Merged &amp; Commit SHA</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px; line-height: 1;">☁️</span>
+            <span><strong>AWS S3:</strong> Validates Audit Artifact in Bucket</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px; line-height: 1;">💬</span>
+            <span><strong>Slack:</strong> Checks #done Channel Confirmations</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="item-box" style="border-color: #6366F1; background: #EEF2FF;">
+        <strong>Zero-Nag Pacing:</strong>
+        Exponential backoff alerts only when SLA deadline is truly in jeopardy!
+      </div>
+    </div>
+
+    <!-- Arrow 3 -> 4 (Branching) -->
+    <div class="arrow-col" style="flex-direction: column; justify-content: space-around; height: 320px; width: 70px;">
+      <!-- Top branch to HITL -->
+      <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+        <span style="font-size: 11px; font-family: 'Inter'; font-weight: bold; color: #DC2626; background: #FEE2E2; padding: 1px 4px; border-radius: 4px; white-space: nowrap; margin-bottom: 2px;">Ambiguous</span>
+        <svg style="width: 44px; height: 44px;" viewBox="0 0 50 50">
+          <path d="M 5 35 Q 25 35, 42 12" stroke="#DC2626" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M 30 10 L 44 10 L 44 24" stroke="#DC2626" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <!-- Bottom branch to Verified -->
+      <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+        <svg style="width: 44px; height: 44px;" viewBox="0 0 50 50">
+          <path d="M 5 15 Q 25 15, 42 38" stroke="#16A34A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M 44 24 L 44 40 L 30 40" stroke="#16A34A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span style="font-size: 11px; font-family: 'Inter'; font-weight: bold; color: #16A34A; background: #DCFCE7; padding: 1px 4px; border-radius: 4px; white-space: nowrap; margin-top: 2px;">Verified</span>
+      </div>
+    </div>
+
+    <!-- STEP 4: DECISION & PROOF -->
+    <div class="decision-split">
+
+      <!-- HITL Branch -->
+      <div class="hitl-box">
+        <div style="font-family: 'Caveat'; font-size: 22px; font-weight: bold; color: #991B1B;">
+          ⚠️ Ambiguity Stop Rule (HITL)
+        </div>
+        <p style="font-size: 15px; color: #7F1D1D; margin-top: 4px;">
+          If evidence is missing or confidence &lt; 85%:<br>
+          <strong>Agent stops, explains WHY, and asks human manager for 1-click decision.</strong>
+        </p>
+      </div>
+
+      <!-- Verified Branch -->
+      <div class="verified-box">
+        <div style="font-family: 'Caveat'; font-size: 22px; font-weight: bold; color: #166534;">
+          ✅ Objective Proof Verified!
+        </div>
+        <div style="font-family: 'Inter', sans-serif; font-size: 12px; color: #15803D; margin-top: 6px; background: #DCFCE7; padding: 6px; border-radius: 6px; word-break: break-all;">
+          <strong>SHA-256 Digest:</strong><br>
+          e3b0c44298fc1c149afbf4c8996fb92427ae41...
+        </div>
+        <p style="font-size: 15px; color: #14532D; margin-top: 6px;">
+          🎖️ <strong>AWS Builder-Style Badge Awarded:</strong><br>
+          <code style="font-size: 13px; font-weight: bold; color: #047857;">AWS-FF-2026-BEDROCK</code>
+        </p>
+      </div>
+
+      <div class="sticky sticky-green" style="position: relative; margin-top: 4px;">
+        Proof, not promises!<br>Team SLA updated in PostgreSQL.
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>Architecture: <strong>AWS Strands Agents SDK v1.55.1</strong> · <strong>Amazon Bedrock AgentCore</strong> · <strong>ECS Fargate</strong></span>
+    <span>Production Edge: <strong>http://followflow.duckdns.org</strong></span>
+    <span>Hackathon Submission · <strong>Professional Agents Track</strong></span>
+  </div>
+
+</body>
+</html>
