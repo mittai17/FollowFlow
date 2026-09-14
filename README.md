@@ -216,10 +216,11 @@ Open **[http://localhost:3000](http://localhost:3000)** to explore FollowFlow.
 
 ## ☁️ Live Production Deployment on AWS
 
-FollowFlow is hosted live on **Amazon ECS Fargate** with **Amazon ECR** and **Amazon Bedrock**:
+FollowFlow is hosted live on **Amazon ECS Fargate** behind an **AWS Application Load Balancer** with **Amazon ECR** and **Amazon Bedrock**:
 
-- **Production Web Application**: **[http://13.217.58.190:3000](http://13.217.58.190:3000)**
-- **Production Agent API**: **[http://13.217.58.190:8000/health](http://13.217.58.190:8000/health)**
+- **Permanent AWS Canonical URL**: **[http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com](http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com)** (Port 80 & 3000)
+- **Custom Domain (`is-a.dev`)**: **[`followflow.is-a.dev`](https://github.com/is-a-dev/register/pull/52345)**
+- **Production Agent API Health**: **[http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com/health](http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com/health)**
 - **AWS Region**: `us-east-1`
 - **AWS Account ID**: `798404182134`
 - **ECS Cluster**: `arn:aws:ecs:us-east-1:798404182134:cluster/followflow-production`
