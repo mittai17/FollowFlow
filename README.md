@@ -206,30 +206,25 @@ Open **[http://localhost:3000](http://localhost:3000)** to explore FollowFlow.
 
 ---
 
-## ☁️ Production Deployment on AWS
+## ☁️ Live Production Deployment on AWS
 
-### 1. Authenticate with AWS CLI
-FollowFlow integrates natively with AWS CLI (version 2.32.0 or later):
+FollowFlow is hosted live on **Amazon ECS Fargate** with **Amazon ECR** and **Amazon Bedrock**:
+
+- **Production Web Application**: **[http://13.217.58.190:3000](http://13.217.58.190:3000)**
+- **Production Agent API**: **[http://13.217.58.190:8000/health](http://13.217.58.190:8000/health)**
+- **AWS Region**: `us-east-1`
+- **AWS Account ID**: `798404182134`
+- **ECS Cluster**: `arn:aws:ecs:us-east-1:798404182134:cluster/followflow-production`
+- **ECS Service**: `followflow-service` (Launch Type: Fargate, Status: ACTIVE)
+- **Task Definition**: `arn:aws:ecs:us-east-1:798404182134:task-definition/followflow-production-task:1`
+- **ECR Web Image**: `798404182134.dkr.ecr.us-east-1.amazonaws.com/followflow-web:latest`
+- **ECR Agent Image**: `798404182134.dkr.ecr.us-east-1.amazonaws.com/followflow-agent:latest`
+
+### Automated Deployment Script
+Deploy updates to production with a single command:
 ```bash
-aws --version
-aws login
+./scripts/deploy_aws.sh
 ```
-
-### 2. Build Container Images
-Both `apps/web` and `apps/agent` include optimized production Dockerfiles:
-
-```bash
-# Build Frontend (Next.js Standalone Mode)
-docker build -t followflow-web:latest apps/web
-
-# Build Agent (Python 3.12 + System OCR)
-docker build -t followflow-agent:latest apps/agent
-```
-
-### 3. Deploy to AWS App Runner or Amazon ECS
-- **Frontend**: Deploy `followflow-web` container directly to **AWS App Runner** with port `3000`.
-- **Backend Agent**: Deploy `followflow-agent` to **AWS App Runner** or **Amazon ECS Fargate** with port `8000`.
-- **Amazon Bedrock AgentCore**: Register the agent container using the `/ping` and `/invocations` contract.
 
 ---
 

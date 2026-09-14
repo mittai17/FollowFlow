@@ -212,11 +212,17 @@ npm run dev
 docker run -d --name mailpit -p 8025:8025 -p 1025:1025 axllent/mailpit:latest
 ```
 
-### Production Deployment to AWS
-- **Frontend Container (`apps/web/Dockerfile`)**: Multi-stage Node 20 Slim image utilizing Next.js `standalone` mode (`output: 'standalone'` in `next.config.js`). Ready for **AWS App Runner** or **Amazon ECS Fargate**.
-- **Agent Container (`apps/agent/Dockerfile`)**: Python 3.12 Slim image with system OCR libraries and Uvicorn server.
-- **Amazon Bedrock AgentCore Contract**: Implements `/ping` (health check) and `/invocations` (runtime execution) for direct compatibility with AWS Bedrock AgentCore runtime.
-- **AWS Authentication**: Authentication to AWS CLI is managed via `aws login` (requires AWS CLI >= 2.32.0).
+### Live Production Deployment on AWS
+- **Live Production URL (Web)**: `http://13.217.58.190:3000`
+- **Live Production URL (Agent API)**: `http://13.217.58.190:8000`
+- **AWS Region**: `us-east-1`
+- **AWS Account ID**: `798404182134` (`arn:aws:iam::798404182134:root`)
+- **ECS Cluster**: `arn:aws:ecs:us-east-1:798404182134:cluster/followflow-production`
+- **ECS Service**: `followflow-service` (Launch type: FARGATE, Status: ACTIVE)
+- **Task Definition**: `arn:aws:ecs:us-east-1:798404182134:task-definition/followflow-production-task:1`
+- **ECR Web Container**: `798404182134.dkr.ecr.us-east-1.amazonaws.com/followflow-web:latest`
+- **ECR Agent Container**: `798404182134.dkr.ecr.us-east-1.amazonaws.com/followflow-agent:latest`
+- **Deployment Script**: `scripts/deploy_aws.sh`
 
 ---
 
@@ -228,4 +234,5 @@ docker run -d --name mailpit -p 8025:8025 -p 1025:1025 axllent/mailpit:latest
 - [x] Deploy multi-org and multi-team management
 - [x] Implement AWS Builder Center badges with SHA-256 verification
 - [x] Add enterprise production suite (404, 500, Terms, Privacy, Security, Status, Support)
-- [ ] Connect live AWS CloudFormation / App Runner deployment via AWS CLI credentials
+- [x] Deploy live to AWS Fargate with Amazon ECR and Amazon Bedrock integration
+
