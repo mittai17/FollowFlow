@@ -14,10 +14,15 @@
 ---
 
 ## 🌐 Live Production Deployments
+- **Custom Global Domain**: [http://followflow.duckdns.org](http://followflow.duckdns.org)
+- **Direct Enterprise Login**: [http://followflow.duckdns.org/login](http://followflow.duckdns.org/login)
 - **Permanent AWS Canonical URL**: [http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com](http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com) (Port 80 & Port 3000)
-- **Workspace Settings Hub**: [http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com/settings](http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com/settings)
-- **Team Profile Inspector**: [http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com/profile?u=elena_v](http://followflow-alb-2061937775.us-east-1.elb.amazonaws.com/profile?u=elena_v)
-- **Custom Free Domain (`is-a.dev`)**: [`followflow.is-a.dev`](https://github.com/is-a-dev/register/pull/52345) *(Active PR #52345 on `is-a-dev/register` with 100% passing CI checks)*
+- **Interactive Pitch Deck**: [HTML Presentation](presentation/index.html) · [PowerPoint .PPTX](presentation/FollowFlow_AWS_Hackathon_Pitch.pptx) · [PDF Deck](presentation/FollowFlow_AWS_Hackathon_Pitch.pdf)
+
+---
+
+## 🏗️ System Architecture
+![FollowFlow Architecture](docs/architecture_diagram.png)
 
 ---
 

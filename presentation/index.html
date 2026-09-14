@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FollowFlow — AWS Hackathon Pitch Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-white: #f8fafc;
+      --text-muted: #94a3b8;
+      --aws-orange: #ff9900;
+      --indigo: #6366f1;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-white);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Presentation Slide Frame */
+    .deck-container {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      transform: scale(0.98);
+      padding: 3.5rem 5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* Header formatting */
+    .slide-header {
+      margin-bottom: 2rem;
+    }
+
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--aws-orange);
+      margin-bottom: 0.5rem;
+    }
+
+    .slide-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--text-white);
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+
+    .slide-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      max-width: 900px;
+      line-height: 1.5;
+    }
+
+    /* Grid Layouts */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      flex: 1;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      flex: 1;
+    }
+
+    .grid-2x2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 1.25rem;
+      flex: 1;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card.highlight-orange { border-color: rgba(255, 153, 0, 0.4); }
+    .card.highlight-indigo { border-color: rgba(99, 102, 241, 0.4); }
+    .card.highlight-emerald { border-color: rgba(16, 185, 129, 0.4); }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-body {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      color: #38bdf8;
+      margin-top: 0.75rem;
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+
+    /* Bottom Control Bar */
+    .controls {
+      height: 60px;
+      background: #070a12;
+      border-top: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 3rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      z-index: 100;
+    }
+
+    .progress-bar-container {
+      flex: 1;
+      max-width: 400px;
+      height: 4px;
+      background: #1e293b;
+      border-radius: 2px;
+      margin: 0 2rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--indigo), var(--aws-orange));
+      transition: width 0.3s ease;
+    }
+
+    .btn {
+      background: #1e293b;
+      color: var(--text-white);
+      border: 1px solid #334155;
+      padding: 0.4rem 0.85rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #334155;
+      border-color: #475569;
+    }
+
+    .btn-primary {
+      background: var(--indigo);
+      border-color: var(--indigo);
+    }
+    .btn-primary:hover {
+      background: #4f46e5;
+    }
+
+    /* Speaker Notes Modal */
+    #notes-panel {
+      position: fixed;
+      bottom: 70px;
+      right: 3rem;
+      width: 440px;
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 1rem;
+      padding: 1.25rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 200;
+    }
+
+    #notes-panel h4 {
+      font-size: 0.85rem;
+      color: var(--aws-orange);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+
+    #notes-content {
+      font-size: 0.85rem;
+      color: #e5e7eb;
+      line-height: 1.5;
+    }
+
+    /* Print styles for exporting to PDF */
+    @media print {
+      body {
+        overflow: visible;
+        height: auto;
+      }
+      .controls, #notes-panel {
+        display: none !important;
+      }
+      .slide {
+        position: relative !important;
+        opacity: 1 !important;
+        transform: none !important;
+        page-break-after: always;
+        height: 100vh;
+        width: 100vw;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck-container">
+
+    <!-- SLIDE 1: COVER -->
+    <div class="slide active" data-notes="Opening hook (0:00 - 0:45). Introduce FollowFlow, track (Professional Agents), and key value prop: solving the 60% promise drop-off without human nagging.">
+      <div class="slide-header">
+        <div class="tag-badge">
+          <span style="color: #ff9900;">●</span> AWS Agents for Humans Hackathon · Professional Agents Track
+        </div>
+        <h1 class="slide-title" style="font-size: 3.5rem; margin-top: 0.5rem;">
+          FollowFlow
+        </h1>
+        <p style="font-size: 1.75rem; font-weight: 700; color: var(--indigo); margin-top: 0.25rem;">
+          Autonomous Commitment Network
+        </p>
+        <p class="slide-subtitle" style="font-size: 1.2rem; margin-top: 1rem;">
+          <strong>Keep your promises. Let AI handle the follow-through.</strong><br>
+          The autonomous operations agent that detects commitments, monitors deadlines in the background, collects objective evidence across industry tools, and verifies completion without nagging.
+        </p>
+      </div>
+
+      <div class="grid-3" style="max-height: 220px;">
+        <div class="card highlight-indigo">
+          <div class="card-title" style="color: var(--indigo);">AWS Strands Agents SDK</div>
+          <div class="card-body">v1.55.1 custom tool decorators for SLA compliance, horizon calculation, and inline Strands AI Copilot extraction.</div>
+        </div>
+        <div class="card highlight-orange">
+          <div class="card-title" style="color: var(--aws-orange);">Amazon Bedrock AgentCore</div>
+          <div class="card-body">Production-ready /ping & /invocations runtime contract prepared for Amazon Bedrock AgentCore Harness.</div>
+        </div>
+        <div class="card highlight-emerald">
+          <div class="card-title" style="color: var(--emerald);">Amazon ECS Fargate Multi-AZ</div>
+          <div class="card-body">Live containerized deployment behind AWS Application Load Balancer on Port 80 & DuckDNS custom edge.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: THE PROBLEM -->
+    <div class="slide" data-notes="Problem statement (0:45 - 1:15). Highlight why informal work commitments fail: people don't lack good intentions, but follow-through is broken. Over 60% of promises drop off, and PMs spend 20%+ of time nagging.">
+      <div class="slide-header">
+        <div class="tag-badge">The Problem</div>
+        <h2 class="slide-title">Work Shouldn't Get Stuck in Broken Promises</h2>
+        <p class="slide-subtitle">Knowledge workers make commitments daily across Slack, meetings, emails, and PRs. Most disappear until someone gets angry.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card highlight-indigo">
+          <div class="card-title" style="color: #818cf8;">1. The 60% Promise Drop-off</div>
+          <div class="card-body">
+            "I'll send the SOC2 checklist by Friday" or "I'll review the architecture PR tomorrow" slip through the cracks because informal commitments are never structured or continuously monitored.
+          </div>
+          <div class="card-code">Status: Untracked &amp; Forgotten</div>
+        </div>
+        <div class="card highlight-orange">
+          <div class="card-title" style="color: #fb923c;">2. The Human Nagging Tax</div>
+          <div class="card-body">
+            Managers and leads spend 20%+ of their workweek checking in, sending Slack DMs, and scheduling status meetings just to ask: <em>"Is this done yet?"</em>
+          </div>
+          <div class="card-code">Cost: 4–6 hrs/week wasted per lead</div>
+        </div>
+        <div class="card highlight-emerald">
+          <div class="card-title" style="color: #34d399;">3. The Static Issue-Tracker Flaw</div>
+          <div class="card-body">
+            Jira and Linear record intent through manual ticket creation, but they provide zero autonomous follow-through, zero objective evidence inspection, and zero proactive risk intervention.
+          </div>
+          <div class="card-code">Gap: Passive record, not active agent</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: THE SOLUTION -->
+    <div class="slide" data-notes="The Solution (1:15 - 2:00). Introduce FollowFlow's core value: runs quietly in the background, surfaces only when there's a real decision to make (Ambiguity Stop Rule).">
+      <div class="slide-header">
+        <div class="tag-badge">The Solution</div>
+        <h2 class="slide-title">FollowFlow: The Autonomous AI Employee</h2>
+        <p class="slide-subtitle">Instead of another app you have to manage, FollowFlow works autonomously in the background and only surfaces when a human decision is needed.</p>
+      </div>
+
+      <div class="grid-2x2">
+        <div class="card highlight-indigo">
+          <div class="card-title" style="color: #818cf8;">✦ Zero-Overhead AI Extraction</div>
+          <div class="card-body">The inline Strands AI Copilot extracts structured promises directly from conversation: owner (@username), deliverable criteria, deadline horizon, and team SLA scope.</div>
+        </div>
+        <div class="card highlight-orange">
+          <div class="card-title" style="color: #fb923c;">⚙ Autonomous 5-Step Agent Loop</div>
+          <div class="card-body">Continuously runs <em>Observe → Reason → Act → Wait → Verify</em>. Calculates deadline horizons, monitors risk tiers (Active, Due Soon, Critical), and dispatches contextual follow-ups via Amazon SES.</div>
+        </div>
+        <div class="card highlight-emerald">
+          <div class="card-title" style="color: #34d399;">🔍 Objective Multi-App Verification</div>
+          <div class="card-body">Validates completion against real artifacts: merged GitHub PRs, Slack #Done receipts, Notion PRD statuses, and AWS S3 deliverable uploads.</div>
+        </div>
+        <div class="card" style="border-color: rgba(245, 158, 11, 0.4);">
+          <div class="card-title" style="color: #fbbf24;">🛡 Ambiguity Stop Rule (HITL Gateway)</div>
+          <div class="card-body">When confidence is high, it marks work fulfilled autonomously. When evidence is ambiguous or conflicting, it pauses, explains why it stopped, and awaits a 1-click human decision.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: ARCHITECTURE -->
+    <div class="slide" data-notes="Architecture deep-dive (2:00 - 2:45). Walk through the 4-tier diagram: Ingress (ALB), ECS Fargate Containers, Strands SDK Agent Layer, and PostgreSQL Data/Proof Layer.">
+      <div class="slide-header" style="margin-bottom: 1rem;">
+        <div class="tag-badge">Cloud Architecture</div>
+        <h2 class="slide-title" style="font-size: 2rem;">End-to-End AWS Production Architecture</h2>
+        <p class="slide-subtitle" style="font-size: 0.95rem;">High-concurrency distributed runtime powered by AWS Strands Agents SDK v1.55.1 and Amazon ECS Fargate.</p>
+      </div>
+
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 1rem; border: 1px solid var(--card-border);">
+        <img src="../docs/architecture_diagram.png" alt="Architecture Diagram" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </div>
+    </div>
+
+    <!-- SLIDE 5: STRANDS SDK DEEP DIVE -->
+    <div class="slide" data-notes="Strands SDK details (2:45 - 3:30). Highlight custom @tool decorators in architect.py, async bridging with asyncio.to_thread, and Bedrock AgentCore /ping & /invocations readiness.">
+      <div class="slide-header">
+        <div class="tag-badge">Strands SDK Implementation</div>
+        <h2 class="slide-title">AWS Strands Agents SDK v1.55.1 Deep Dive</h2>
+        <p class="slide-subtitle">Registered tool chain, asynchronous bridge, and Bedrock AgentCore runtime compatibility.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card highlight-indigo">
+          <div class="card-title" style="color: #818cf8;">1. Custom Tool Chain</div>
+          <div class="card-body">
+            Decorated with Strands <code>@tool</code>:
+          </div>
+          <div class="card-code">@tool
+def lookup_industry_integration(...)
+
+@tool
+def calculate_commitment_horizon(...)
+
+@tool
+def verify_sla_compliance(...)</div>
+          <div class="card-body" style="margin-top: 0.5rem; font-size: 0.85rem;">Instantiated via Agent(tools=[...], model="anthropic.claude-3")</div>
+        </div>
+
+        <div class="card highlight-orange">
+          <div class="card-title" style="color: #fb923c;">2. Bedrock AgentCore Ready</div>
+          <div class="card-body">
+            Full compliance with Amazon Bedrock AgentCore managed agent loop:
+          </div>
+          <div class="card-code">GET  /ping
+→ 200 OK Container Health
+
+POST /invocations
+→ Native Bedrock Agent Execution</div>
+          <div class="card-body" style="margin-top: 0.5rem; font-size: 0.85rem;">Deployable seamlessly to Bedrock AgentCore Harness</div>
+        </div>
+
+        <div class="card highlight-emerald">
+          <div class="card-title" style="color: #34d399;">3. Async Concurrency</div>
+          <div class="card-body">
+            High-throughput bridge between synchronous agent tools and FastAPI's asynchronous loop:
+          </div>
+          <div class="card-code"># Non-blocking executor bridge
+res = await asyncio.to_thread(
+    agent_architect.run, prompt
+)</div>
+          <div class="card-body" style="margin-top: 0.5rem; font-size: 0.85rem;">Zero thread starvation under concurrent API traffic</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: ENTERPRISE SIGN-IN WALL & GOVERNANCE -->
+    <div class="slide" data-notes="Enterprise polish (3:30 - 4:15). Discuss the Sign-In Wall protecting all routes, 36 real database users, team SLA policies (95%), and cryptographic proof with AWS Builder badges.">
+      <div class="slide-header">
+        <div class="tag-badge">Enterprise Polish</div>
+        <h2 class="slide-title">Enterprise Sign-In Wall &amp; Cryptographic Trust</h2>
+        <p class="slide-subtitle">Zero dummy mock data. Built with real PostgreSQL multi-tenancy, authentic authentication, and immutable SHA-256 audit digests.</p>
+      </div>
+
+      <div class="grid-2x2">
+        <div class="card highlight-indigo">
+          <div class="card-title" style="color: #818cf8;">🔒 Enterprise Sign-In Wall</div>
+          <div class="card-body">Protected route guards on all internal pages (/dashboard, /commitments, /settings). Unauthenticated traffic is intercepted. Clean login card with Google SSO, AWS Identity Center, and password toggles.</div>
+        </div>
+        <div class="card highlight-orange">
+          <div class="card-title" style="color: #fb923c;">👥 36 Real Database Personas</div>
+          <div class="card-body">Every user (@rahulk, @devon_c, @sarah_c) is a persistent database record with unique roles, historical reliability scores, and team affiliations. Zero hardcoded mock users in UI components.</div>
+        </div>
+        <div class="card highlight-emerald">
+          <div class="card-title" style="color: #34d399;">🏢 Multi-Tenant SLA Governance</div>
+          <div class="card-body">Organizations (FollowFlow Labs) host scoped teams with independent 95% target fulfillment SLA policies and automated grace period buffers (24h–72h).</div>
+        </div>
+        <div class="card" style="border-color: rgba(245, 158, 11, 0.4);">
+          <div class="card-title" style="color: #fbbf24;">🏅 Cryptographic Proof Ledger</div>
+          <div class="card-body">Inspired by AWS Builder Center Badges: every fulfilled promise produces an immutable SHA-256 digest (e.g. <code>FF-AWS-2026-BEDROCK</code>) for verifiable SOC 2 audit readiness.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: LIVE DEPLOYMENT & SUMMARY -->
+    <div class="slide" data-notes="Conclusion & wrap up (4:15 - 4:55). Reiterate live public links (DuckDNS, ALB, GitHub repo), MIT license, and alignment with judging criteria. Invite judges to test!">
+      <div class="slide-header">
+        <div class="tag-badge">Live Production Cloud</div>
+        <h2 class="slide-title">Deployed, Live, and Ready to Evaluate</h2>
+        <p class="slide-subtitle">FollowFlow is fully operational on Amazon ECS Fargate and accessible worldwide via custom edge domains.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card highlight-orange">
+          <div class="card-title" style="color: var(--aws-orange);">🌐 Live Production Endpoints</div>
+          <div class="card-body" style="font-size: 1rem;">
+            <p style="margin-bottom: 0.75rem;"><strong>• Public Custom Domain:</strong><br><a href="http://followflow.duckdns.org" target="_blank" style="color: #38bdf8; text-decoration: none;">http://followflow.duckdns.org</a></p>
+            <p style="margin-bottom: 0.75rem;"><strong>• Direct Sign-In Wall:</strong><br><a href="http://followflow.duckdns.org/login" target="_blank" style="color: #38bdf8; text-decoration: none;">http://followflow.duckdns.org/login</a></p>
+            <p style="margin-bottom: 0.75rem;"><strong>• Canonical AWS ALB DNS:</strong><br><span style="font-family: monospace; font-size: 0.85rem; color: #cbd5e1;">followflow-alb-2061937775.us-east-1.elb.amazonaws.com</span></p>
+            <p style="margin-bottom: 0.75rem;"><strong>• Public GitHub Repository:</strong><br><a href="https://github.com/mittai17/FollowFlow" target="_blank" style="color: #a78bfa; text-decoration: none;">https://github.com/mittai17/FollowFlow</a></p>
+            <p><strong>• Open Source License:</strong> MIT License (Permissive, open source)</p>
+          </div>
+        </div>
+
+        <div class="card highlight-emerald">
+          <div class="card-title" style="color: var(--emerald);">🏆 Judging Criteria Alignment</div>
+          <div class="card-body">
+            <p style="margin-bottom: 0.5rem;"><strong style="color: #f8fafc;">1. Technological Implementation:</strong> Working Strands SDK v1.55.1 @tool chains + Bedrock AgentCore /ping &amp; /invocations + ECS Fargate deployment.</p>
+            <p style="margin-bottom: 0.5rem;"><strong style="color: #f8fafc;">2. Design:</strong> Complete, quiet Linear/Vercel product experience with Bento grid metrics and Inter typography.</p>
+            <p style="margin-bottom: 0.5rem;"><strong style="color: #f8fafc;">3. Potential Impact:</strong> Directly eliminates the 60% promise drop-off; recovers 4–6 hrs/week of status meetings.</p>
+            <p style="margin-bottom: 0.5rem;"><strong style="color: #f8fafc;">4. Creativity:</strong> Shifts the paradigm from subjective manual check-ins to objective, verifiable multi-app proof.</p>
+            <p><strong style="color: #f8fafc;">5. Presentation:</strong> Full 5-minute video, live public URL, and comprehensive architecture artifacts.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Controls -->
+  <div class="controls">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <span id="slide-indicator" style="font-weight: 700; font-family: monospace; color: var(--text-white);">1 / 7</span>
+      <button class="btn" id="prev-btn">← Prev</button>
+      <button class="btn btn-primary" id="next-btn">Next →</button>
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-fill" id="progress-bar" style="width: 14.28%;"></div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <button class="btn" id="notes-toggle-btn">🎙 Speaker Notes</button>
+      <button class="btn" onclick="window.print()">🖨 Export to PDF</button>
+      <a href="./FollowFlow_AWS_Hackathon_Pitch.pptx" download class="btn btn-primary" style="text-decoration: none;">⬇ Download .PPTX</a>
+    </div>
+  </div>
+
+  <!-- Speaker Notes Floating Panel -->
+  <div id="notes-panel">
+    <h4>🎙 Speaker Notes (What to say)</h4>
+    <p id="notes-content">Welcome everyone to FollowFlow...</p>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const indicator = document.getElementById('slide-indicator');
+    const progressBar = document.getElementById('progress-bar');
+    const notesPanel = document.getElementById('notes-panel');
+    const notesContent = document.getElementById('notes-content');
+    const notesBtn = document.getElementById('notes-toggle-btn');
+    let currentIndex = 0;
+
+    function updateSlide(newIndex) {
+      if (newIndex < 0 || newIndex >= slides.length) return;
+      slides[currentIndex].classList.remove('active');
+      currentIndex = newIndex;
+      slides[currentIndex].classList.add('active');
+
+      indicator.textContent = `${currentIndex + 1} / ${slides.length}`;
+      progressBar.style.width = `${((currentIndex + 1) / slides.length) * 100}%`;
+
+      const notes = slides[currentIndex].getAttribute('data-notes') || 'No notes for this slide.';
+      notesContent.innerHTML = notes;
+    }
+
+    document.getElementById('prev-btn').addEventListener('click', () => updateSlide(currentIndex - 1));
+    document.getElementById('next-btn').addEventListener('click', () => updateSlide(currentIndex + 1));
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        updateSlide(currentIndex + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        updateSlide(currentIndex - 1);
+      } else if (e.key === 's' || e.key === 'S') {
+        notesPanel.style.display = notesPanel.style.display === 'block' ? 'none' : 'block';
+      }
+    });
+
+    notesBtn.addEventListener('click', () => {
+      notesPanel.style.display = notesPanel.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Initialize first slide notes
+    updateSlide(0);
+  </script>
+</body>
+</html>
