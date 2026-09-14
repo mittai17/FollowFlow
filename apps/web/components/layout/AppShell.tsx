@@ -22,6 +22,7 @@ const agentNav = [
   { href: '/activity', label: 'Agent Activity', icon: Activity },
   { href: '/approvals', label: 'Approvals', icon: CheckCircle2 },
   { href: '/verification', label: 'Verification', icon: ShieldCheck },
+  { href: '/demo', label: 'Autonomous Simulator', icon: Zap },
 ];
 
 const mobileBottomNav = [
@@ -56,10 +57,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex items-center gap-2">
           <Link
-            href="/demo"
-            className="flex items-center gap-1 px-2.5 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-[10px] font-bold"
+            href="/commitments?new=true"
+            className="flex items-center gap-1 px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[10px] font-bold shadow-xs hover:bg-indigo-700 transition-colors"
           >
-            <Zap className="w-2.5 h-2.5 text-amber-600" /> Demo
+            <Plus className="w-3 h-3" /> New
           </Link>
           <button
             onClick={() => setDrawerOpen(!drawerOpen)}
@@ -92,20 +93,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
 
-              <div className="mb-4 space-y-2">
+              <div className="mb-4">
                 <Link
                   href="/commitments?new=true"
                   onClick={() => setDrawerOpen(false)}
                   className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-indigo-600 text-white rounded-xl text-xs font-semibold shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" /> Make a Commitment
-                </Link>
-                <Link
-                  href="/demo"
-                  onClick={() => setDrawerOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs font-bold"
-                >
-                  <Zap className="w-3 h-3 text-amber-600" /> Run Autonomous Demo
                 </Link>
               </div>
 
@@ -186,18 +180,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <div className="p-3 space-y-1.5">
+        <div className="p-3">
           <Link
             href="/commitments?new=true"
             className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100"
           >
             <Plus className="w-3.5 h-3.5" /> Make a Commitment
-          </Link>
-          <Link
-            href="/demo"
-            className="w-full flex items-center justify-center gap-2 py-1.5 px-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-medium text-amber-800 hover:bg-amber-100 transition-colors"
-          >
-            <Zap className="w-3 h-3 text-amber-600" /> Run Autonomous Demo
           </Link>
         </div>
 
@@ -251,7 +239,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </nav>
 
-        <div className="px-3 pb-3 border-t border-[#E4E7EC] pt-2 space-y-1">
+        <div className="px-3 pb-3 border-t border-[#E4E7EC] pt-2 space-y-1.5">
+          <div className="flex items-center justify-between text-[10px] text-[#98A2B3] px-2 pt-0.5 font-medium">
+            <Link href="/status" className="hover:text-indigo-600 transition-colors">Status</Link>
+            <span>·</span>
+            <Link href="/security" className="hover:text-indigo-600 transition-colors">Security</Link>
+            <span>·</span>
+            <Link href="/terms" className="hover:text-indigo-600 transition-colors">Terms</Link>
+            <span>·</span>
+            <Link href="/support" className="hover:text-indigo-600 transition-colors">Support</Link>
+          </div>
           <Link
             href="/settings"
             className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#667085] hover:text-[#111827] hover:bg-[#F7F8FA] transition-all"

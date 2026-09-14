@@ -67,21 +67,15 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowRulesModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E4E7EC] rounded-xl text-xs font-semibold text-[#667085] hover:text-[#111827] hover:border-indigo-300 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E4E7EC] rounded-xl text-xs font-semibold text-[#667085] hover:text-[#111827] hover:border-indigo-300 transition-colors shadow-2xs"
           >
             <HelpCircle className="w-3.5 h-3.5 text-indigo-500" /> Scoring Rules
           </button>
           <Link
             href="/commitments?new=true"
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100"
           >
-            <Plus className="w-4 h-4" /> Make Commitment
-          </Link>
-          <Link
-            href="/demo"
-            className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-semibold hover:bg-amber-600 transition-all shadow-sm shadow-amber-200"
-          >
-            <Zap className="w-4 h-4" /> Run Demo
+            <Plus className="w-4 h-4" /> New Commitment
           </Link>
         </div>
       </div>
@@ -198,7 +192,7 @@ export default function DashboardPage() {
           {loading ? (
             <div className="space-y-3">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-12" />)}</div>
           ) : events.length === 0 ? (
-            <EmptyState icon="🤖" title="Agent standing by" description="No activity yet. Run demo to see events." />
+            <EmptyState icon="⚡" title="Monitoring telemetry active" description="Autonomous listener standing by. No anomalies detected in current window." />
           ) : (
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
               {events.slice(0, 7).map((e) => (

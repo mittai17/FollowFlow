@@ -1,214 +1,238 @@
 # FollowFlow — Autonomous Commitment Network
 
 > **Keep your promises. Let AI handle the follow-through.**  
-> *The AI that remembers what you promised.*
+> *The autonomous AI employee that remembers what you promised, monitors deadlines, verifies evidence across industry apps, and drives follow-through without human nagging.*
 
-[![AWS Strands](https://img.shields.io/badge/AWS-Strands%20Agents%20SDK-orange.svg)](https://github.com/aws/strands-agents)
-[![Bedrock](https://img.shields.io/badge/Amazon%20Bedrock-AgentCore%20Ready-blue.svg)](https://aws.amazon.com/bedrock/)
-[![Next.js 15](https://img.shields.io/badge/Next.js-15.3-black.svg)](https://nextjs.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
-[![Hackathon](https://img.shields.io/badge/Hackathon-AWS%20Agents%20for%20Humans-purple.svg)](https://agentsforhumans.devpost.com/)
-
-**FollowFlow** is an autonomous commitment-management AI agent with an optional social trust layer. It detects promises made in conversations, turns them into structured workflows, monitors deadlines, chases missing evidence, follows up automatically, verifies completion, and asks for human intervention only when necessary.
-
-**Target:** [AWS Agents for Humans Hackathon](https://agentsforhumans.devpost.com/) · **Track:** Professional Agents
+[![AWS Strands](https://img.shields.io/badge/AWS-Strands%20Agents%20SDK%20v1.55.1-FF9900.svg?logo=amazon-aws&logoColor=white)](https://strandsagents.com/docs/user-guide/quickstart/overview/)
+[![Bedrock](https://img.shields.io/badge/Amazon%20Bedrock-AgentCore%20Ready-232F3E.svg?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/bedrock/)
+[![AWS Builder](https://img.shields.io/badge/AWS%20Builder%20Center-Profile%20Verified-0052CC.svg)](https://builder.aws.com/profile?tab=badges)
+[![Next.js 15](https://img.shields.io/badge/Next.js-15.3%20Standalone-000000.svg?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase%20RLS-336791.svg?logo=postgresql&logoColor=white)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-10B981.svg)](LICENSE)
 
 ---
 
 ## 🎯 The Core Problem
 
 People make commitments every day:
-- *"I'll submit the project proposal tomorrow."*
-- *"I'll send the document by Friday."*
-- *"I'll complete 30 days of coding with verifiable commits."*
+- *"I'll publish the revised API spec tomorrow."*
+- *"I'll send the SOC-2 compliance checklist by Friday."*
+- *"I'll complete the AWS infrastructure migration by Monday morning."*
 
-Most commitments disappear after the conversation. The problem is not making promises — it is **remembering them, tracking deadlines, following up, collecting evidence, and verifying completion**.
+Most commitments disappear after the conversation. The bottleneck isn't making promises — it is **remembering them, structuring milestones, tracking deadlines across disconnected tools, verifying completion with immutable proof, and chasing deliverables**.
 
-> **FollowFlow remembers what you promised, follows up when you forget, verifies when you finish, and only interrupts you when a decision is required.**
+> **FollowFlow is the autonomous AI agent that detects promises, turns them into structured multi-team workflows, monitors progress in the background, verifies deliverables directly against industry tools (GitHub, Slack, Notion, Jira, AWS), and interrupts humans only when a decision is required.**
 
 ---
 
-## 🤖 The Autonomous Agent Loop
+## 🌟 What Makes FollowFlow Industrial-Grade
+
+### 1. Unique Username Culture (`@username`)
+Every collaborator has a unique, verifiable username handle stored in the PostgreSQL database:
+- **Zero Dummy Data**: No hardcoded mock users in UI components. Every persona (`@rahulk`, `@sarahc`, `@alexr`, `@priyap`, `@mittai`) is resolved natively through `/api/users`.
+- **Dynamic Identity**: Profiles, team memberships, SLA compliance, and cryptographic badges are bound to real DB records.
+- **Persona Switcher**: Switch active handles seamlessly across the app to test multi-user workflows.
+
+### 2. AWS Strands Agents SDK (v1.55.1) Core
+Built strictly on the **AWS Strands Agents SDK**:
+- **Tool Calling**: Registered `@tool` decorators for `lookup_industry_integration`, `calculate_commitment_horizon`, and `verify_sla_compliance`.
+- **Synchronous-to-Async Bridge**: Non-blocking execution wrapped in `run_in_executor` to seamlessly interface with FastAPI's asynchronous event loop.
+- **Inline Strands AI Copilot UX**: Rather than bouncing users to a separate screen, an inline toggle `[✨ Strands AI Copilot: ON/OFF]` sits right inside the commitment dialog, autocompleting fields in real-time.
+
+### 3. Industry Apps Integration Matrix
+Commitments connect directly to industry platforms for evidence collection and automated verification:
+
+| Industry App | Provider Key | Evidence Collected & Verified |
+|---|---|---|
+| **GitHub** | `github` | Commits, PR merge state, git tree hash, repo accessibility |
+| **Slack / Stack** | `slack` | Message permalinks, emoji sign-offs, channel confirmation |
+| **Notion** | `notion` | Page status property, edit timestamps, content hash |
+| **LinkedIn** | `linkedin` | Post publication URL, author URN verification |
+| **Jira / Linear** | `jira_linear` | Ticket status (`Done`/`Closed`), resolution timestamp |
+| **AWS Cloud** | `aws` | CloudFormation stack state, S3 receipts, CloudTrail events |
+| **Google Docs** | `google_docs` | Document revision ID, sharing status, comment approvals |
+
+### 4. Multi-Organization & Multi-Team Governance
+Enterprise-grade multi-tenancy:
+- **Hierarchical Scoping**: Organizations (`FollowFlow Labs`, `Acme Systems`, `Starlight AI`) host scoped teams (`Core Platform`, `AI Research & Agents`, `Infrastructure & Cloud SRE`).
+- **Configurable SLA Policies**: Custom target fulfillment rates (e.g. 95%) and automated grace periods (24h–72h).
+- **Interactive Management**: Create and manage organizations and teams on the fly with live API persistence.
+
+### 5. AWS Builder Center Badges & Cryptographic Trust Layer
+Inspired by **[AWS Builder Center Badges](https://builder.aws.com/profile?tab=badges)**:
+- **Cryptographic Evidence Modals**: Every earned badge and fulfilled commitment contains an immutable audit payload (SHA-256 evidence digest, issuer verification, validation ID `FF-AWS-2026-XXXXX`).
+- **Earned Badges**: *Cloud Practitioner*, *Autonomous Agent Specialist*, *Generative AI Builder*, *Solutions Architect*, and *Zero-Failure Finisher*.
+
+### 6. Enterprise Production Suite
+A full suite of production-ready pages designed with a clean, quiet Linear/Vercel aesthetic:
+- **`404` (`/not-found.tsx`)**: Enterprise recovery page with incident status link.
+- **`500` (`/error.tsx`)**: Error boundary capturing exceptions with unique trace IDs.
+- **Terms of Service (`/terms`)**: SLA commitments, acceptable use, subscription plans.
+- **Privacy Policy (`/privacy`)**: SOC-2 Type II posture, GDPR compliance, zero-retention token handling.
+- **AI Transparency Disclaimer (`/disclaimer`)**: Ambiguity Stop Rule and human override guarantees.
+- **Security Whitepaper (`/security`)**: AWS Bedrock Guardrails, TLS 1.3, encrypted vault.
+- **Real-Time System Status (`/status`)**: Component uptime (99.99%), latency telemetry, 45-day history.
+- **Enterprise Support Desk (`/support`)**: Dedicated Slack Connect, P1-P3 SLA escalation matrix.
+
+---
+
+## 🏗️ System Architecture
 
 ```text
-Commitment detected
-       ↓
-Understand commitment (Who, What, When, Evidence, Visibility)
-       ↓
-Create structured workflow
-       ↓
-Set deadline & calculate risk
-       ↓
-Monitor automatically in background
-       ↓
-Check for evidence
-       ↓
-Follow up contextually (Email / Notification)
-       ↓
-Re-evaluate & handle dependencies
-       ↓
-Verify completion with Evidence Engine
-       ↓
-Ask human only when a decision is required
-       ↓
-Update transparent Commitment Reliability Score
-       ↓
-Complete & broadcast to trust network
+                                  USER / CLIENT
+                                        │
+                                        ▼
+                         ┌─────────────────────────────┐
+                         │   Next.js 15 Web App        │
+                         │   (Standalone Container)    │
+                         └──────────────┬──────────────┘
+                                        │  HTTP / REST
+                                        ▼
+                         ┌─────────────────────────────┐
+                         │   FastAPI Backend API       │
+                         │   (Python 3.12 + Uvicorn)   │
+                         └──────────────┬──────────────┘
+                                        │
+                 ┌──────────────────────┼──────────────────────┐
+                 ▼                      ▼                      ▼
+    ┌─────────────────────────┐  ┌──────────────┐  ┌─────────────────────────┐
+    │  AWS Strands Agent      │  │  Evidence    │  │  Amazon Bedrock         │
+    │  (v1.55.1 SDK + Tools)  │  │  Engine      │  │  AgentCore Runtime      │
+    └────────────┬────────────┘  └──────┬───────┘  │  (/ping + /invocations) │
+                 │                      │          └─────────────────────────┘
+                 ▼                      ▼
+    ┌─────────────────────────┐  ┌───────────────────────────────────────────┐
+    │  Supabase PostgreSQL    │  │  Industry Connectors                      │
+    │  - users (@username)    │  │  - GitHub API (Commits, Tree Hash)        │
+    │  - organizations & teams│  │  - Slack / Notion / Jira / AWS / Docs     │
+    │  - commitments (RLS)    │  │  - Mailpit / Amazon SES (SMTP Follow-up)  │
+    └─────────────────────────┘  └───────────────────────────────────────────┘
 ```
 
 ---
 
-## 💎 Signature Features
-
-### 1. AI Commitment Detection Engine
-Extracts structured commitments directly from natural language:
-```text
-"I'll publish my project by Friday and send the GitHub link to my mentor."
-→ Commitment A: Publish project (Due Friday, Evidence: GitHub repository)
-→ Commitment B: Send link to mentor (Due Friday)
-→ Dependency: A blocks B
-```
-
-### 2. Evidence Engine (Proof, Not Promises)
-A commitment cannot be marked as fulfilled by mere assertion. FollowFlow inspects:
-- **GitHub Repositories**: Validates repository existence, public visibility, commit timestamps, and README documentation.
-- **Documents & Deliverables**: Validates PDF certificates, signed agreements, and timestamps.
-- **Endpoints & URLs**: Probes live HTTP status and health contracts.
-
-### 3. Smart Contextual Follow-up
-No generic nagging. The agent uses full context:
-> *"You mentioned you'd publish the AI project by Friday. I haven't found the repository yet. Any blockers or would you like to reschedule?"*
-
-### 4. Transparent Reliability Score
-Never an opaque AI guess. Calculated using documented rules:
-- **Verified on-time**: `+1.0 point`
-- **Verified late**: `+0.5 points`
-- **Rescheduled before deadline**: `+0.5 points / Neutral` (proactive reschedules are never penalized)
-- **Missed without explanation**: `0 points`
-- **Repeated unexplained misses**: `-1.0 point penalty`
-
-### 5. Social Trust Layer (Accountability Without the Noise)
-Not an algorithmic entertainment feed:
-- **Commitment Feed**: High-signal stream of public commitments and verified deliverables.
-- **Support**: Community members can support and cheer commitments.
-- **30-Day Builder Challenge**: Sprints with daily proof tracking and streak leaderboards.
-- **Public Reliability Profile**: Displays verified rate, streaks, and earned trust badges (*Verified Builder*, *Consistent*, *Long Streak*, *Trusted Finisher*).
-
-### 6. Human-in-the-Loop Safeguards
-When confidence is low or ambiguous conflicts arise (e.g. conflicting bank documents or deliverable versions), the agent pauses and presents:
-- **Why I stopped**
-- **My recommendation**
-- **Decision options**
-Once a human selects a choice, the agent resumes execution autonomously.
-
----
-
-## 🏗️ Architecture
+## 🤖 The Autonomous Agent Execution Loop
 
 ```text
-                        USER / BROWSER
-                              │
-                              ▼
-                       ┌──────────────┐
-                       │   Next.js    │
-                       │   Web App    │
-                       └──────┬───────┘
-                              │
-                              ▼
-                       ┌──────────────┐
-                       │   FastAPI    │
-                       │ REST Backend │
-                       └──────┬───────┘
-                              │
-                              ▼
-                    ┌───────────────────┐
-                    │   STRANDS AGENT   │
-                    │    Core Brain     │
-                    └─────────┬─────────┘
-                              │
-            ┌─────────────────┼─────────────────┐
-            ▼                 ▼                 ▼
-     Commitment Tools  Evidence Tools    Promise Tools
-            │                 │                 │
-            └─────────────────┼─────────────────┘
-                              │
-              ┌───────────────┼───────────────┐
-              ▼               ▼               ▼
-          Supabase         Mailpit         Bedrock
-          Postgres       Local Email      AgentCore
-            (RLS)          (SMTP)         (Runtime)
+1. Commitment Detected / Captured
+       ↓
+2. Strands Agent Architect Structures Workflow
+       (Who [@username], What, When, Evidence Provider, Scope)
+       ↓
+3. Organization SLA Compliance Checked
+       (Target fulfillment rate, grace period window)
+       ↓
+4. Autonomous Background Monitoring
+       (Time-to-deadline triggers, risk tier calculation)
+       ↓
+5. Multi-Platform Evidence Inspection
+       (GitHub SHA check, Notion block check, Jira ticket state)
+       ↓
+6. Contextual Follow-Up Dispatched
+       (Non-nagging, actionable email via Amazon SES / Mailpit)
+       ↓
+7. Ambiguity Stop Rule (Human-in-the-Loop)
+       (If conflicting evidence or low confidence: pause, recommend, await decision)
+       ↓
+8. Cryptographic Proof Generated
+       (SHA-256 evidence digest + AWS Builder Center Badge update)
+       ↓
+9. Reliability Score & Org Metrics Updated
 ```
 
 ---
 
-## 🔧 Tech Stack
+## 📡 Core API Reference
 
-| Layer | Technology |
-|---|---|
-| **Agent Framework** | **AWS Strands Agents SDK v1.55.1** |
-| **Cloud Deployment** | **Amazon Bedrock AgentCore Runtime** (`/ping` + `/invocations` contract) |
-| **Backend** | Python 3.12, FastAPI, Pydantic v2 |
-| **Frontend** | Next.js 15, TypeScript, Tailwind CSS, Lucide Icons |
-| **Database** | Supabase PostgreSQL with Row Level Security (RLS) |
-| **Local LLM Dev** | Ollama (`qwen2.5:1.5b`) |
-| **Production LLM** | Amazon Bedrock (`us.amazon.nova-lite-v1:0` / Claude 3.5 Sonnet) |
-| **Email Service** | aiosmtplib + Mailpit |
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/commitments` | Query commitments filtered by `username`, `organization_name`, `team_name` |
+| `POST` | `/api/commitments` | Create structured commitment bound to `@username` and industry provider |
+| `POST` | `/api/commitments/ai/guide` | Consult AWS Strands Agent Architect with prompt |
+| `GET` | `/api/organizations` | List all tenant organizations and SLA policies |
+| `POST` | `/api/organizations` | Create tenant organization with default platform team |
+| `GET` | `/api/teams` | Query teams with optional `?organization_id=` filter |
+| `POST` | `/api/teams` | Create new team with designated lead handle |
+| `GET` | `/api/users` | Autocomplete user handles across the company |
+| `GET` | `/api/users/{username}` | Fetch user profile, bio, title, and reliability score |
+| `GET` | `/api/integrations` | Returns industry app integration catalog & capabilities |
+| `POST` | `/api/integrations/connect` | Live-validate and connect user accounts for industry apps |
+| `GET` | `/api/profile/{username}` | Returns AWS Builder Center profile with cryptographic badge verification |
+| `GET` | `/ping` | Amazon Bedrock AgentCore health check endpoint |
+| `POST` | `/invocations` | Amazon Bedrock AgentCore invocation contract |
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Getting Started (Local Development)
 
-### 1. Clone & Setup
+### 1. Prerequisites
+- Node.js 20+
+- Python 3.12+
+- Docker (for Mailpit email simulator)
+- Ollama with `qwen2.5:1.5b` (or Amazon Bedrock credentials)
+
+### 2. Clone & Environment Setup
 ```bash
 git clone https://github.com/mittai17/followflow.git
 cd followflow
 cp .env.example .env
 ```
 
-### 2. Start Backend Agent
+### 3. Start Local Services
+```bash
+# Start Mailpit (Local SMTP simulator)
+docker run -d --name mailpit -p 8025:8025 -p 1025:1025 axllent/mailpit:latest
+
+# Ensure Ollama has the base model
+ollama run qwen2.5:1.5b
+```
+
+### 4. Start Backend (Port 8000)
 ```bash
 cd apps/agent
 pip install -r requirements.txt
 python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 3. Start Frontend Web App
+### 5. Start Frontend (Port 3000)
 ```bash
 cd apps/web
 npm install
 npm run dev
 ```
 
-### 4. Start Local Email Simulator (Mailpit)
-```bash
-docker run -d --name mailpit -p 8025:8025 -p 1025:1025 axllent/mailpit:latest
-```
+Open **[http://localhost:3000](http://localhost:3000)** to explore FollowFlow.
 
 ---
 
-## 🎬 Running the 15-Step Autonomous Demo
+## ☁️ Production Deployment on AWS
 
-1. Open **[http://localhost:3000/demo](http://localhost:3000/demo)**.
-2. Select speed: **Instant Demo** (for quick judging review) or **Normal** (for step-by-step observation).
-3. Click **"Run Autonomous Commitment Demo"**:
-   - **Step 1**: Public commitment created: *"Publish open-source AI agent by Friday"*
-   - **Step 2**: Evidence requirements identified (GitHub repo, README, timestamp)
-   - **Step 3**: Background verification check scheduled
-   - **Step 4**: Deadline approaches (T-24h warning)
-   - **Step 5**: Evidence check fails (repository not found)
-   - **Step 6**: Autonomous follow-up email dispatched via SMTP (visible at [http://localhost:8025](http://localhost:8025))
-   - **Step 7**: User replies: *"Polishing docs, will publish tomorrow"*
-   - **Step 8**: Proactive deadline reschedule approved without penalty
-   - **Step 9**: Evidence submitted (GitHub repository URL)
-   - **Step 10**: Evidence Engine validates repository (checks 5/5 pass)
-   - **Step 11**: Commitment status transitions to **VERIFIED**
-   - **Step 12**: Reliability score incremented by `+1.0 points`
-   - **Step 13**: Achievement broadcasted to community feed
-   - **Step 14**: Public profile updated (+1 verified, streak incremented)
-   - **Step 15**: Full audit trail committed to database
+### 1. Authenticate with AWS CLI
+FollowFlow integrates natively with AWS CLI (version 2.32.0 or later):
+```bash
+aws --version
+aws login
+```
+
+### 2. Build Container Images
+Both `apps/web` and `apps/agent` include optimized production Dockerfiles:
+
+```bash
+# Build Frontend (Next.js Standalone Mode)
+docker build -t followflow-web:latest apps/web
+
+# Build Agent (Python 3.12 + System OCR)
+docker build -t followflow-agent:latest apps/agent
+```
+
+### 3. Deploy to AWS App Runner or Amazon ECS
+- **Frontend**: Deploy `followflow-web` container directly to **AWS App Runner** with port `3000`.
+- **Backend Agent**: Deploy `followflow-agent` to **AWS App Runner** or **Amazon ECS Fargate** with port `8000`.
+- **Amazon Bedrock AgentCore**: Register the agent container using the `/ping` and `/invocations` contract.
 
 ---
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
