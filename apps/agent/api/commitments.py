@@ -28,11 +28,16 @@ class CommitmentCreate(BaseModel):
     evidence_type: Optional[str] = None
     evidence_url: Optional[str] = None
     owner_name: str = "Rahul Kumar"
+    owner_username: str = "rahulk"
     scope: str = "individual"  # "individual" or "team"
     organization_name: str = "FollowFlow Labs"
+    team_name: Optional[str] = "Core Platform Team"
+    team_id: Optional[str] = None
     role: str = "Lead Engineer"
     team_members: Optional[List[str]] = None
     github_repo: Optional[str] = None
+    integration_provider: str = "github"
+    integration_meta: Optional[dict] = None
     file_url: Optional[str] = None
     file_name: Optional[str] = None
     file_size: Optional[str] = None
@@ -50,6 +55,7 @@ class CommitmentUpdate(BaseModel):
     evidence_url: Optional[str] = None
     scope: Optional[str] = None
     organization_name: Optional[str] = None
+    team_name: Optional[str] = None
     role: Optional[str] = None
 
 
@@ -67,6 +73,8 @@ class AIGuideInput(BaseModel):
     scope: Optional[str] = "individual"
     organization: Optional[str] = "FollowFlow Labs"
     role: Optional[str] = "Lead Engineer"
+    username: Optional[str] = "rahulk"
+    provider: Optional[str] = "github"
 
 
 @router.get("")
@@ -74,6 +82,10 @@ async def list_commitments(
     visibility: Optional[str] = None,
     status: Optional[str] = None,
     risk: Optional[str] = None,
+    username: Optional[str] = None,
+    organization_name: Optional[str] = None,
+    team_name: Optional[str] = None,
+    scope: Optional[str] = None,
     search: Optional[str] = None,
     limit: int = 50,
 ):
@@ -84,6 +96,14 @@ async def list_commitments(
         q = q.eq("status", status)
     if risk:
         q = q.eq("risk", risk)
+    if username:
+        q = q.eq("owner_username", username.lstrip("@"))
+    if organization_name:
+        q = q.eq("organization_name", organization_name)
+    if team_name:
+        q = q.eq("team_name", team_name)
+    if scope:
+        q = q.eq("scope", scope)
     res = q.execute()
     items = res.data or []
     if search:
@@ -131,6 +151,7 @@ async def get_commitment_stats():
 
 @router.post("")
 async def create_commitment(body: CommitmentCreate):
+    clean_username = body.owner_username.lstrip("@") if body.owner_username else "rahulk"
     data = {
         "title": body.title,
         "description": body.description,
@@ -138,11 +159,16 @@ async def create_commitment(body: CommitmentCreate):
         "evidence_type": body.evidence_type,
         "evidence_url": body.evidence_url,
         "owner_name": body.owner_name,
+        "owner_username": clean_username,
         "scope": body.scope,
         "organization_name": body.organization_name,
+        "team_name": body.team_name,
+        "team_id": body.team_id,
         "role": body.role,
         "team_members": body.team_members or [],
         "github_repo": body.github_repo,
+        "integration_provider": body.integration_provider or "github",
+        "integration_meta": body.integration_meta or {},
         "file_url": body.file_url,
         "file_name": body.file_name,
         "file_size": body.file_size,
@@ -160,14 +186,17 @@ async def create_commitment(body: CommitmentCreate):
     supabase().table("agent_events").insert({
         "commitment_id": commitment.get("id"),
         "event_type": "commitment_created",
-        "description": f'Commitment recorded: "{body.title}" ({body.scope} · {body.organization_name})',
+        "description": f'Commitment recorded: "{body.title}" by @{clean_username} ({body.scope} · {body.organization_name} / {body.team_name or "General"})',
         "actor_type": "user",
         "metadata": {
             "visibility": body.visibility,
             "evidence": body.evidence_type,
             "scope": body.scope,
             "role": body.role,
-            "organization": body.organization_name
+            "organization": body.organization_name,
+            "team": body.team_name,
+            "owner_username": clean_username,
+            "integration_provider": body.integration_provider,
         },
     }).execute()
     
@@ -243,64 +272,22 @@ async def connect_github_repo(body: GitHubConnectInput):
 @router.post("/ai/guide")
 async def ai_guided_creation(body: AIGuideInput):
     """
-    Interactive AI Commitment Creator:
-    Understands vague or detailed intent, asks clarifying questions if needed,
-    and returns a structured, production-ready commitment blueprint.
+    Interactive Strands-powered AI Commitment Architect:
+    Leverages Strands Agents SDK (https://strandsagents.com/docs/user-guide/quickstart/overview/)
+    to evaluate intention, select industry integration, calculate SLA horizon,
+    and generate a production-ready contract.
     """
-    from datetime import timedelta
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    sys_prompt = (
-        "You are FollowFlow's Autonomous Commitment Architect. "
-        "Your role is to transform raw human intentions into bulletproof, verifiable commitments. "
-        "If the user provides vague input, suggest concrete deliverables, deadlines, and proof criteria. "
-        "Always output valid JSON."
+    from agent.architect import consult_commitment_architect
+    clean_username = body.username.lstrip("@") if body.username else "rahulk"
+    blueprint = await consult_commitment_architect(
+        prompt=body.prompt,
+        scope=body.scope or "individual",
+        organization=body.organization or "FollowFlow Labs",
+        role=body.role or "Lead Engineer",
+        username=clean_username,
+        provider=body.provider or "github",
     )
-    user_prompt = f"""User intent: "{body.prompt}"
-Context:
-- Scope: {body.scope}
-- Organization: {body.organization}
-- Role: {body.role}
-- Today's Date: {today}
-
-Produce a JSON blueprint:
-{{
-  "title": "Action-oriented concise commitment title",
-  "description": "Clear explanation of the scope, deliverables, and acceptance criteria",
-  "suggested_deadline": "YYYY-MM-DD",
-  "deadline_label": "e.g. This Friday 6:00 PM",
-  "evidence_type": "github_repo | document | url | signed_pdf | screenshot",
-  "evidence_instructions": "Specific instructions on what must be verified (e.g. Public repo with passing tests and README)",
-  "scope": "{body.scope}",
-  "organization_name": "{body.organization}",
-  "role": "{body.role}",
-  "visibility": "private | shared | public",
-  "clarifying_questions": [
-    "Optional clarifying question 1 if anything is ambiguous",
-    "Optional clarifying question 2"
-  ],
-  "dependencies": ["Prerequisite step if applicable"],
-  "confidence": 0.95
-}}"""
-    try:
-        response = await call_llm(user_prompt, sys_prompt, json_mode=True)
-        parsed = extract_json(response) or {}
-        return parsed
-    except Exception as e:
-        return {
-            "title": body.prompt,
-            "description": f"Deliverable committed by {body.role} at {body.organization}",
-            "suggested_deadline": (datetime.now(timezone.utc) + timedelta(days=3)).strftime("%Y-%m-%d"),
-            "deadline_label": "In 3 Days",
-            "evidence_type": "github_repo",
-            "evidence_instructions": "Verifiable delivery with documentation and test artifacts",
-            "scope": body.scope,
-            "organization_name": body.organization,
-            "role": body.role,
-            "visibility": "private",
-            "clarifying_questions": [],
-            "dependencies": [],
-            "confidence": 0.90
-        }
+    return blueprint
 
 
 @router.get("/{id}")

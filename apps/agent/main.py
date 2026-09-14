@@ -12,6 +12,8 @@ from api.routes import docs_router, approvals_router, events_router, agent_route
 from api.demo import router as demo_router
 from api.commitments import router as commitments_router
 from api.social import router as social_router
+from api.organizations import router as organizations_router
+from api.integrations import router as integrations_router
 import structlog
 
 log = structlog.get_logger()
@@ -65,6 +67,8 @@ app.include_router(agent_router)
 app.include_router(demo_router)
 app.include_router(commitments_router)
 app.include_router(social_router)
+app.include_router(organizations_router)
+app.include_router(integrations_router)
 
 import os
 from fastapi.staticfiles import StaticFiles

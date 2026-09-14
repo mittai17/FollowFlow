@@ -11,7 +11,8 @@ import { formatDate, formatDateTime, getRelativeTime, getEventIcon, cn } from '@
 import {
   ArrowLeft, ShieldCheck, Clock, CheckCircle2, AlertTriangle,
   Calendar, Globe, Lock, Users, Sparkles, Heart, RefreshCw, X, Link as LinkIcon,
-  Building2, UserCheck, Github, Paperclip, ExternalLink, Download
+  Building2, UserCheck, Github, Paperclip, ExternalLink, Download,
+  Cloud, MessageSquare, BookOpen, Share2, CheckSquare, Layers
 } from 'lucide-react';
 
 export default function CommitmentDetailPage() {
@@ -225,10 +226,19 @@ export default function CommitmentDetailPage() {
         </div>
 
         {/* Status Metrics Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[#E4E7EC] text-xs">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t border-[#E4E7EC] text-xs">
           <div>
             <span className="text-[#98A2B3] block">Owner</span>
-            <span className="font-bold text-[#111827]">{data.owner_name}</span>
+            <span className="font-bold text-[#111827]">
+              {data.owner_name}{' '}
+              <span className="text-indigo-600 font-mono">(@{data.owner_username || 'rahulk'})</span>
+            </span>
+          </div>
+          <div>
+            <span className="text-[#98A2B3] block">Team & Org</span>
+            <span className="font-bold text-[#111827] truncate block">
+              {data.team_name || 'Platform'} · {data.organization_name || 'FollowFlow'}
+            </span>
           </div>
           <div>
             <span className="text-[#98A2B3] block">Deadline</span>
@@ -238,7 +248,7 @@ export default function CommitmentDetailPage() {
           </div>
           <div>
             <span className="text-[#98A2B3] block">Evidence Expected</span>
-            <span className="font-bold text-[#111827] capitalize">{data.evidence_type || 'URL/Document'}</span>
+            <span className="font-bold text-[#111827] capitalize">{data.evidence_type || 'Integration/URL'}</span>
           </div>
           <div>
             <span className="text-[#98A2B3] block">Progress</span>
@@ -250,17 +260,31 @@ export default function CommitmentDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column: Evidence & Dependencies (2 cols) */}
         <div className="md:col-span-2 space-y-6">
-          {/* GitHub Repository Connected Card */}
-          {data.github_repo && (
+          {/* Industry App Connected Card (GitHub, Slack, Notion, LinkedIn, Jira, AWS, Google Docs) */}
+          {(data.github_repo || data.integration_provider) && (
             <div className="bg-white rounded-[20px] border border-gray-200 p-5 shadow-sm">
               <div className="flex items-center justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center">
-                    <Github className="w-4 h-4" />
+                    {data.integration_provider === 'aws' ? (
+                      <Cloud className="w-4 h-4 text-amber-400" />
+                    ) : data.integration_provider === 'slack' ? (
+                      <MessageSquare className="w-4 h-4 text-purple-300" />
+                    ) : data.integration_provider === 'notion' ? (
+                      <BookOpen className="w-4 h-4 text-emerald-300" />
+                    ) : data.integration_provider === 'linkedin' ? (
+                      <Share2 className="w-4 h-4 text-blue-300" />
+                    ) : data.integration_provider === 'jira_linear' ? (
+                      <CheckSquare className="w-4 h-4 text-indigo-300" />
+                    ) : (
+                      <Github className="w-4 h-4" />
+                    )}
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-[#111827]">Connected GitHub Repository</h3>
-                    <p className="text-[11px] text-[#667085]">Monitored commits, pull requests, and deliverable artifacts</p>
+                    <h3 className="font-bold text-sm text-[#111827]">
+                      Connected {data.integration_provider ? data.integration_provider.toUpperCase().replace('_', ' / ') : 'GitHub'} Integration
+                    </h3>
+                    <p className="text-[11px] text-[#667085]">Monitored commits, status webhooks, and deliverable artifacts</p>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
@@ -270,19 +294,23 @@ export default function CommitmentDetailPage() {
 
               <div className="p-3 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl flex items-center justify-between gap-3 text-xs font-mono">
                 <div className="flex items-center gap-2 truncate">
-                  <span className="text-gray-500">repo:</span>
-                  <span className="font-bold text-[#111827] truncate">{data.github_repo}</span>
+                  <span className="text-gray-500">resource:</span>
+                  <span className="font-bold text-[#111827] truncate">
+                    {data.github_repo || data.evidence_url || `${data.integration_provider || 'integration'} connection`}
+                  </span>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <a
-                    href={`https://github.com/${data.github_repo.replace('https://github.com/', '')}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
-                  >
-                    View on GitHub <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
+                {(data.github_repo || data.evidence_url) && (
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <a
+                      href={data.evidence_url || `https://github.com/${data.github_repo?.replace('https://github.com/', '')}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                    >
+                      Inspect Source <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           )}

@@ -71,24 +71,67 @@ export const connectGitHubRepo = (repo: string) =>
     body: JSON.stringify({ repo }),
   });
 
-export const guideCommitmentAI = (prompt: string, scope = 'individual', organization = 'FollowFlow Labs', role = 'Lead Engineer') =>
+export const guideCommitmentAI = (
+  prompt: string,
+  scope = 'individual',
+  organization = 'FollowFlow Labs',
+  role = 'Lead Engineer',
+  username = 'rahulk',
+  provider = 'github'
+) =>
   req<{
     title: string;
     description: string;
     suggested_deadline: string;
     deadline_label: string;
+    integration_provider: string;
     evidence_type: string;
     evidence_instructions: string;
     scope: string;
     organization_name: string;
     role: string;
+    owner_username: string;
     visibility: string;
     clarifying_questions: string[];
     dependencies: string[];
+    copilot_advice?: string;
     confidence: number;
   }>('/api/commitments/ai/guide', {
     method: 'POST',
-    body: JSON.stringify({ prompt, scope, organization, role }),
+    body: JSON.stringify({ prompt, scope, organization, role, username, provider }),
+  });
+
+// ── Organizations, Teams & Username Culture ─────────────────────────────────
+export const getOrganizations = () => req<Organization[]>('/api/organizations');
+export const createOrganization = (data: { name: string; slug?: string; plan?: string }) =>
+  req<Organization>('/api/organizations', { method: 'POST', body: JSON.stringify(data) });
+
+export const getTeams = (params?: { organization_id?: string; organization_name?: string }) => {
+  const q = new URLSearchParams();
+  if (params?.organization_id) q.append('organization_id', params.organization_id);
+  if (params?.organization_name) q.append('organization_name', params.organization_name);
+  const qs = q.toString();
+  return req<Team[]>(`/api/teams${qs ? `?${qs}` : ''}`);
+};
+
+export const createTeam = (data: { organization_id: string; name: string; description?: string; lead_username?: string }) =>
+  req<Team>('/api/teams', { method: 'POST', body: JSON.stringify(data) });
+
+export const getUsers = (search?: string) =>
+  req<User[]>(`/api/users${search ? `?search=${encodeURIComponent(search)}` : ''}`);
+
+export const getUserProfile = (username: string) =>
+  req<{ user: User; commitments: Commitment[]; stats: any }>(`/api/users/${encodeURIComponent(username.replace('@', ''))}`);
+
+export const createOrUpdateUser = (data: Partial<User>) =>
+  req<User>('/api/users', { method: 'POST', body: JSON.stringify(data) });
+
+// ── Industry App Integrations ────────────────────────────────────────────────
+export const getAvailableIntegrations = () => req<IntegrationItem[]>('/api/integrations');
+export const connectIntegration = (provider: string, identifier: string) =>
+  req<IntegrationConnectResult>('/api/integrations/connect', {
+    method: 'POST',
+    body: JSON.stringify({ provider, identifier }),
   });
 
 // ── Social & Community ──────────────────────────────────────────────────────
@@ -177,10 +220,15 @@ export interface Commitment {
   updated_at: string;
   supports?: { count: number }[];
   scope?: 'individual' | 'team';
+  owner_username?: string;
   organization_name?: string;
+  team_name?: string;
+  team_id?: string;
   role?: string;
   team_members?: string[];
   github_repo?: string;
+  integration_provider?: string;
+  integration_meta?: Record<string, any>;
   file_url?: string;
   file_name?: string;
   file_size?: string;
@@ -215,11 +263,16 @@ export interface CreateCommitmentInput {
   evidence_type?: string;
   evidence_url?: string;
   owner_name?: string;
+  owner_username?: string;
   scope?: 'individual' | 'team';
   organization_name?: string;
+  team_name?: string;
+  team_id?: string;
   role?: string;
   team_members?: string[];
   github_repo?: string;
+  integration_provider?: string;
+  integration_meta?: Record<string, any>;
   file_url?: string;
   file_name?: string;
   file_size?: string;
@@ -315,4 +368,59 @@ export interface ScoringRules {
   }[];
   formula: string;
   safeguards: string[];
+}
+
+export interface User {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  role: string;
+  title?: string;
+  bio?: string;
+  avatar_url?: string;
+  reliability_score: number;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  plan: string;
+  logo_url?: string;
+  team_count?: number;
+  sla_policy?: {
+    target_fulfillment_rate: number;
+    grace_period_hours: number;
+  };
+}
+
+export interface Team {
+  id: string;
+  organization_id: string;
+  organization_name: string;
+  name: string;
+  slug: string;
+  description: string;
+  lead_username: string;
+}
+
+export interface IntegrationItem {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  placeholder: string;
+  badge_color: string;
+  evidence_type: string;
+}
+
+export interface IntegrationConnectResult {
+  connected: boolean;
+  provider: string;
+  title: string;
+  url?: string;
+  status: string;
+  evidence_criteria: string;
+  [key: string]: any;
 }

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   LayoutDashboard, CheckSquare, MessageSquare, Trophy,
   Compass, User, Activity, CheckCircle2, ShieldCheck,
-  Settings, RefreshCw, Zap, Plus, Menu, X
+  Settings, RefreshCw, Zap, Plus, Menu, X, Building2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -177,12 +177,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <span className="text-[10px] text-[#667085] font-medium leading-none block">Commitment Network</span>
             </div>
           </Link>
-          <div className="mt-2 flex items-center justify-between">
+          <div className="mt-2.5 pt-2 border-t border-[#E4E7EC]/60 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs text-[#667085] font-medium">Agent Autonomous</span>
+              <Building2 className="w-3 h-3 text-indigo-600" />
+              <span className="text-[11px] font-bold text-[#111827] truncate max-w-[130px]">FollowFlow Labs</span>
             </div>
-            <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold">AWS</span>
+            <span className="text-[9px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded font-bold uppercase">Enterprise</span>
           </div>
         </div>
 
@@ -267,13 +267,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
                 R
               </div>
-              <div>
-                <p className="text-xs font-semibold text-[#111827]">Rahul Kumar</p>
-                <p className="text-[10px] text-[#667085]">Verified Finisher</p>
+              <div className="truncate max-w-[120px]">
+                <p className="text-xs font-bold text-[#111827] truncate">Rahul Kumar</p>
+                <p className="text-[10px] text-indigo-600 font-mono font-bold">@rahulk</p>
               </div>
             </div>
-            <div className="text-right">
-              <span className="text-xs font-bold text-emerald-600">95%</span>
+            <div className="text-right flex-shrink-0">
+              <span className="text-xs font-bold text-emerald-600">96.5%</span>
               <span className="text-[9px] text-[#98A2B3] block">Reliability</span>
             </div>
           </Link>
