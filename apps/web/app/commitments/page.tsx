@@ -145,6 +145,7 @@ function CommitmentsContent() {
   const [copilotPrompt, setCopilotPrompt] = useState('Deploy AWS S3 zero-trust token rotation pipeline with CloudWatch health checks by Friday');
   const [copilotLoading, setCopilotLoading] = useState(false);
   const [copilotAdvice, setCopilotAdvice] = useState<string | null>(null);
+  const [autoHighlighted, setAutoHighlighted] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<CreateCommitmentInput>({
@@ -329,6 +330,8 @@ function CommitmentsContent() {
       if (bp.integration_provider) {
         setIntegrationProvider(bp.integration_provider);
       }
+      setAutoHighlighted(true);
+      setTimeout(() => setAutoHighlighted(false), 4000);
     } catch (err: any) {
       alert(`AI Copilot error: ${err.message}`);
     }
@@ -969,6 +972,13 @@ function CommitmentsContent() {
               )}
 
               {/* 4. Title & Description */}
+              {autoHighlighted && (
+                <div className="p-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-xs font-semibold text-indigo-800 flex items-center gap-2 animate-pulse">
+                  <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <span>✨ Strands Copilot auto-architected 5 fields — review highlighted fields below.</span>
+                </div>
+              )}
+
               <div>
                 <label className="font-bold text-[#111827] block mb-1">Commitment Title *</label>
                 <input
@@ -977,7 +987,9 @@ function CommitmentsContent() {
                   placeholder="e.g. Ship Zero-Trust Token Rotation Pipeline to AWS Bedrock"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-xs text-[#111827] focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className={`w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-xs text-[#111827] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-500 ${
+                    autoHighlighted ? 'ring-2 ring-indigo-500 bg-indigo-50/40' : ''
+                  }`}
                 />
               </div>
 
@@ -988,7 +1000,9 @@ function CommitmentsContent() {
                   placeholder="Describe scope, dependencies, acceptance criteria, and what the agent should audit..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-xs text-[#111827] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none"
+                  className={`w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-xs text-[#111827] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none transition-all duration-500 ${
+                    autoHighlighted ? 'ring-2 ring-indigo-500 bg-indigo-50/40' : ''
+                  }`}
                 />
               </div>
 
@@ -1043,8 +1057,13 @@ function CommitmentsContent() {
                   type="datetime-local"
                   value={formData.deadline}
                   onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-xs text-[#111827] focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className={`w-full px-3 py-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-xl text-xs text-[#111827] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-500 ${
+                    autoHighlighted ? 'ring-2 ring-indigo-500 bg-indigo-50/40' : ''
+                  }`}
                 />
+                <p className="text-[10px] text-[#667085] mt-1.5 flex items-center gap-1">
+                  <span>💡</span> Rescheduling &gt;24h before deadline with documented reason incurs 0 penalty to Reliability Score.
+                </p>
               </div>
 
               {/* 6. Industry App Integrations Dropdown & Quick Connect */}

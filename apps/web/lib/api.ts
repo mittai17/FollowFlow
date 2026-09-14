@@ -1,4 +1,7 @@
-const API = process.env.NEXT_PUBLIC_AGENT_API_URL || 'http://localhost:8000';
+const API =
+  typeof window !== 'undefined'
+    ? ''
+    : (process.env.INTERNAL_AGENT_API_URL || process.env.NEXT_PUBLIC_AGENT_API_URL || 'http://localhost:8000');
 
 async function req<T>(path: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {

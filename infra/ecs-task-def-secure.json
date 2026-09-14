@@ -1,0 +1,105 @@
+{
+  "family": "followflow-production-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::798404182134:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::798404182134:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "followflow-agent",
+      "image": "798404182134.dkr.ecr.us-east-1.amazonaws.com/followflow-agent:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "SUPABASE_URL",
+          "value": "https://aepvoyytbfbghigajecz.supabase.co"
+        },
+        {
+          "name": "AWS_DEFAULT_REGION",
+          "value": "us-east-1"
+        },
+        {
+          "name": "STRANDS_MODEL_PROVIDER",
+          "value": "bedrock"
+        },
+        {
+          "name": "BEDROCK_MODEL_ID",
+          "value": "anthropic.claude-3-haiku-20240307-v1:0"
+        },
+        {
+          "name": "CORS_ORIGINS",
+          "value": "http://localhost:3000,http://13.217.58.190:3000"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "SUPABASE_SERVICE_ROLE_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:798404182134:secret:followflow/supabase-service-key"
+        },
+        {
+          "name": "SUPABASE_ANON_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:798404182134:secret:followflow/supabase-anon-key"
+        },
+        {
+          "name": "AGENT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:798404182134:secret:followflow/agent-secret"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/followflow",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "agent"
+        }
+      }
+    },
+    {
+      "name": "followflow-web",
+      "image": "798404182134.dkr.ecr.us-east-1.amazonaws.com/followflow-web:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "INTERNAL_AGENT_API_URL",
+          "value": "http://localhost:8000"
+        },
+        {
+          "name": "NEXT_PUBLIC_SUPABASE_URL",
+          "value": "https://aepvoyytbfbghigajecz.supabase.co"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:798404182134:secret:followflow/supabase-anon-key"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/followflow",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "web"
+        }
+      }
+    }
+  ]
+}

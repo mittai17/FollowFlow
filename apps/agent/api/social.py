@@ -1,9 +1,15 @@
 """Social Trust Layer & Feed API routes for FollowFlow Commitment Network"""
+import asyncio
+import time
 from fastapi import APIRouter, HTTPException
 from services.supabase_client import supabase
 from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api", tags=["social"])
+
+_feed_cache = {"data": None, "time": 0}
+_challenges_cache = {"data": None, "time": 0}
+_profiles_cache = {}
 
 
 @router.get("/feed")
@@ -11,54 +17,74 @@ async def get_commitment_feed(limit: int = 30):
     """
     Commitment Feed (Section 18 & 34):
     Shows meaningful public commitments with evidence requirements, support counts, and verification badges.
-    Not an algorithmic noise feed.
     """
+    now = time.time()
+    if _feed_cache["data"] and (now - _feed_cache["time"]) < 12:
+        return _feed_cache["data"]
+
     try:
-        res = supabase().table("commitments").select(
-            "*, supports(id, user_name), evidence(id, verification_status, url)"
-        ).eq("visibility", "public").order("created_at", desc=True).limit(limit).execute()
-        items = res.data or []
-        formatted = []
-        for item in items:
-            supports = item.get("supports") or []
-            evidence_list = item.get("evidence") or []
-            verified_ev = next((e for e in evidence_list if e.get("verification_status") == "verified"), None)
-            formatted.append({
-                **item,
-                "support_count": len(supports),
-                "supporters": [s.get("user_name") for s in supports],
-                "verified_evidence": verified_ev,
-                "is_verified": item.get("status") == "VERIFIED",
-            })
-        return formatted
+        def _fetch():
+            res = supabase().table("commitments").select(
+                "*, supports(id, user_name), evidence(id, verification_status, url)"
+            ).eq("visibility", "public").order("created_at", desc=True).limit(limit).execute()
+            items = res.data or []
+            formatted = []
+            for item in items:
+                supports = item.get("supports") or []
+                evidence_list = item.get("evidence") or []
+                verified_ev = next((e for e in evidence_list if e.get("verification_status") == "verified"), None)
+                formatted.append({
+                    **item,
+                    "support_count": len(supports),
+                    "supporters": [s.get("user_name") for s in supports],
+                    "verified_evidence": verified_ev,
+                    "is_verified": item.get("status") == "VERIFIED",
+                })
+            return formatted
+
+        feed = await asyncio.to_thread(_fetch)
+        _feed_cache["data"] = feed
+        _feed_cache["time"] = now
+        return feed
     except Exception as e:
-        return []
+        return _feed_cache["data"] or []
 
 
 @router.get("/challenges")
 async def list_challenges():
     """Commitment Challenges (Section 20 & 35)."""
+    now = time.time()
+    if _challenges_cache["data"] and (now - _challenges_cache["time"]) < 15:
+        return _challenges_cache["data"]
+
     try:
-        challenges = supabase().table("challenges").select("*").execute().data or []
-        for c in challenges:
-            members = supabase().table("challenge_members").select("*").eq("challenge_id", c["id"]).order("streak", desc=True).execute().data or []
-            c["members"] = members
-            c["top_streak"] = members[0]["streak"] if members else c.get("top_streak", 18)
-        return challenges
+        def _fetch():
+            challenges = supabase().table("challenges").select("*").execute().data or []
+            for c in challenges:
+                members = supabase().table("challenge_members").select("*").eq("challenge_id", c["id"]).order("streak", desc=True).execute().data or []
+                c["members"] = members
+                c["top_streak"] = members[0]["streak"] if members else c.get("top_streak", 18)
+            return challenges
+
+        res = await asyncio.to_thread(_fetch)
+        _challenges_cache["data"] = res
+        _challenges_cache["time"] = now
+        return res
     except Exception:
-        return []
+        return _challenges_cache["data"] or []
 
 
 @router.post("/challenges/{id}/join")
 async def join_challenge(id: str, user_name: str = "Rahul Kumar"):
     """Join a commitment challenge."""
-    res = supabase().table("challenge_members").insert({
+    res = await asyncio.to_thread(supabase().table("challenge_members").insert({
         "challenge_id": id,
         "user_name": user_name,
         "progress": 0,
         "streak": 1,
         "status": "active",
-    }).execute()
+    }).execute)
+    _challenges_cache["data"] = None
     return {"joined": True, "member": res.data[0] if res.data else {}}
 
 
@@ -67,33 +93,42 @@ async def get_public_profile(username: str):
     """
     Public Reliability Profile (Section 15, 21, 36, 51).
     Displays Commitment Reliability %, transparent breakdown, streak, badges, and recent verified achievements.
-    Does NOT expose private commitments.
     """
     clean_user = username.lstrip("@").lower()
-    user_row = supabase().table("users").select("*").or_(f"username.eq.{clean_user},name.ilike.%{username}%").execute().data
-    user = user_row[0] if user_row else {
-        "name": username or "Rahul Kumar",
-        "username": clean_user or "rahulk",
-        "title": "Lead Autonomous Architect",
-        "bio": "Building autonomous AI agents on AWS Bedrock and Strands SDK.",
-        "reliability_score": 96.5,
-    }
-    
-    score_res = supabase().table("scores").select("*").limit(1).execute()
-    score = score_res.data[0] if score_res.data else {
-        "reliability_score": user.get("reliability_score", 96.5),
-        "total_count": 42,
-        "fulfilled_count": 39,
-        "missed_count": 1,
-        "rescheduled_count": 2,
-        "verified_count": 37,
-        "on_time_rate": 94,
-        "fulfillment_rate": 96,
-        "verified_rate": 91,
-        "consistency_rate": 97,
-        "streak_days": 18,
-    }
-    score["reliability_score"] = user.get("reliability_score", score.get("reliability_score", 96.5))
+    now = time.time()
+    cached = _profiles_cache.get(clean_user)
+    if cached and (now - cached["time"]) < 15:
+        return cached["data"]
+
+    def _fetch():
+        user_row = supabase().table("users").select("*").or_(f"username.eq.{clean_user},name.ilike.%{username}%").execute().data
+        user = user_row[0] if user_row else {
+            "name": username or "Rahul Kumar",
+            "username": clean_user or "rahulk",
+            "title": "Lead Autonomous Architect",
+            "bio": "Building autonomous AI agents on AWS Bedrock and Strands SDK.",
+            "reliability_score": 96.5,
+        }
+        score_res = supabase().table("scores").select("*").limit(1).execute()
+        score = score_res.data[0] if score_res.data else {
+            "reliability_score": user.get("reliability_score", 96.5),
+            "total_count": 42,
+            "fulfilled_count": 39,
+            "missed_count": 1,
+            "rescheduled_count": 2,
+            "verified_count": 37,
+            "on_time_rate": 94,
+            "fulfillment_rate": 96,
+            "verified_rate": 91,
+            "consistency_rate": 97,
+            "streak_days": 18,
+        }
+        score["reliability_score"] = user.get("reliability_score", score.get("reliability_score", 96.5))
+        verified_commitments = supabase().table("commitments").select("*").eq("visibility", "public").eq("status", "VERIFIED").order("updated_at", desc=True).limit(10).execute().data or []
+        active_public = supabase().table("commitments").select("*").eq("visibility", "public").in_("status", ["ACTIVE", "DUE_SOON", "DUE_TODAY"]).order("deadline").limit(5).execute().data or []
+        return user, score, verified_commitments, active_public
+
+    user, score, verified_commitments, active_public = await asyncio.to_thread(_fetch)
     
     # AWS Builder & Credly style verified badges
     badges = [
@@ -157,7 +192,7 @@ async def get_public_profile(username: str):
     # Active public commitments
     active_public = supabase().table("commitments").select("*").eq("visibility", "public").in_("status", ["ACTIVE", "DUE_SOON", "DUE_TODAY"]).order("deadline").limit(5).execute().data or []
     
-    return {
+    profile_result = {
         "user": {
             "name": user.get("name", username),
             "username": user.get("username", clean_user),
@@ -173,6 +208,8 @@ async def get_public_profile(username: str):
         "active_commitments": active_public,
         "verified_by": "FollowFlow Autonomous Verification Engine",
     }
+    _profiles_cache[clean_user] = {"data": profile_result, "time": now}
+    return profile_result
 
 
 @router.get("/scoring/rules")

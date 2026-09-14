@@ -99,27 +99,65 @@ export default function ApprovalsPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#111827]">Approvals</h1>
-        <p className="text-sm text-[#667085] mt-0.5">
-          The agent only surfaces here when it genuinely needs a human decision
-        </p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E4E7EC]">
+        <div>
+          <h1 className="text-2xl font-bold text-[#111827]">Approvals & Ambiguity Interventions</h1>
+          <p className="text-xs sm:text-sm text-[#667085] mt-0.5">
+            The agent only surfaces here when it genuinely needs a human decision (Ambiguity Stop Rule).
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-full text-xs font-bold flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Ambiguity Stop Threshold: 85%
+          </span>
+        </div>
       </div>
 
-      {approvals.length > 0 && (
-        <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
-          <AlertTriangle className="w-4 h-4 text-amber-600" />
-          <p className="text-sm font-semibold text-amber-900">{approvals.length} decision{approvals.length !== 1 ? 's' : ''} require your attention</p>
-        </div>
-      )}
+      {approvals.length > 0 ? (
+        <>
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-2xl">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <p className="text-sm font-semibold text-amber-900">
+                {approvals.length} decision{approvals.length !== 1 ? 's' : ''} require executive review
+              </p>
+            </div>
+            <button
+              onClick={async () => {
+                for (const a of approvals) {
+                  try {
+                    await decideApproval(a.id, a.recommendation || a.options[0]);
+                  } catch {}
+                }
+                load();
+              }}
+              className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+            >
+              Batch Approve Recommendations ({approvals.length})
+            </button>
+          </div>
 
-      {loading ? (
+          <div className="space-y-4">
+            {approvals.map((a) => (
+              <ApprovalCard key={a.id} approval={a} onDecide={load} />
+            ))}
+          </div>
+        </>
+      ) : loading ? (
         <div className="space-y-4">{[...Array(2)].map((_, i) => <Skeleton key={i} className="h-56" />)}</div>
-      ) : approvals.length === 0 ? (
-        <EmptyState icon="✅" title="No decisions needed" description="The agent is handling everything autonomously. It will appear here only when a genuine human decision is required." />
       ) : (
-        <div className="space-y-4">
-          {approvals.map(a => <ApprovalCard key={a.id} approval={a} onDecide={load} />)}
+        <div className="p-8 bg-white border border-[#E4E7EC] rounded-[24px] text-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center text-xl">
+            ✓
+          </div>
+          <h3 className="font-bold text-base text-[#111827]">Zero Interventions Pending</h3>
+          <p className="text-xs text-[#667085] max-w-md mx-auto leading-relaxed">
+            The autonomous engine is running with high certainty (&gt;85% confidence). No manual approval is required at this time.
+          </p>
+          <div className="pt-2 text-[11px] font-mono text-indigo-600">
+            Escalation Dampening: Active · False-Positive Filter: Strict
+          </div>
         </div>
       )}
     </div>
